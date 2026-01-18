@@ -194,6 +194,7 @@
   color: var(--text-glow);
   padding: 8px;
   display: flex;
+  overflow: hidden;
   flex-direction: column;
   gap: 6px;
 }

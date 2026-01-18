@@ -1,4 +1,5 @@
 import { createFUIWindow } from "../core/template.js";
+import { isWindowActive } from "../core/utils.js";
 
 // =====================
 // DATA CONSTANTS
@@ -285,8 +286,7 @@ function update() {
 // =====================
 
 function handleKeyboard(e) {
-  const el = document.getElementById("dist-addresses");
-  if (!el || !el.classList.contains("locked")) return;
+  if (!isWindowActive("dist-addresses")) return;
 
   if (e.code === "ArrowDown") {
     e.preventDefault();
@@ -335,8 +335,7 @@ function attachClickHandlers() {
 
   rows.forEach((row) => {
     row.addEventListener("click", (e) => {
-      const el = document.getElementById("dist-addresses");
-      if (!el || !el.classList.contains("locked")) return;
+      if (!isWindowActive("dist-addresses")) return;
 
       const index = Number(row.dataset.index);
 

@@ -1,4 +1,5 @@
 import { createFUIWindow } from "../core/template.js";
+import { isWindowActive } from "../core/utils.js";
 
 /* =====================
    STATE
@@ -267,8 +268,7 @@ function updateHexStatus() {
 ===================== */
 
 function handleKeyboard(e) {
-  const terminal = document.getElementById("dev-terminal");
-  if (!terminal || !terminal.classList.contains("locked")) return;
+  if (!isWindowActive("dev-terminal")) return;
 
   if (e.key === "Enter") {
     e.preventDefault();

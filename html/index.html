@@ -24,7 +24,6 @@
         <button
           data-tab="1main"
           data-key="Digit1"
-          onclick="loadLayout('1main')"
         >
           <span class="tab-icon"></span>
           <span class="tab-number">1</span>
@@ -33,7 +32,6 @@
         <button
           data-tab="2code"
           data-key="Digit2"
-          onclick="loadLayout('2code')"
         >
           <span class="tab-icon"></span>
           <span class="tab-number">2</span>
@@ -42,25 +40,24 @@
         <button
           data-tab="3dist"
           data-key="Digit3"
-          onclick="loadLayout('3dist')"
         >
           <span class="tab-icon"></span>
           <span class="tab-number">3</span>
           <span class="tab-label">:dist</span>
         </button>
-        <button data-tab="4irc" data-key="Digit4" onclick="loadLayout('4irc')">
+        <button data-tab="4irc" data-key="Digit4">
           <span class="tab-icon"></span>
           <span class="tab-number">4</span>
           <span class="tab-label">:irc</span>
         </button>
 
-         <button data-tab="5search" data-key="Digit5" onclick="loadLayout('5search')">
+         <button data-tab="5search" data-key="Digit5">
           <span class="tab-icon"></span>
           <span class="tab-number">5</span>
           <span class="tab-label">:search</span>
         </button>
 
-        <button data-tab="6dev" data-key="Digit6" onclick="loadLayout('6dev')">
+        <button data-tab="6dev" data-key="Digit6">
           <span class="tab-icon"></span>
           <span class="tab-number">6</span>
           <span class="tab-label">:dev</span>
@@ -68,7 +65,6 @@
         <button
           data-tab="7misc"
           data-key="Digit7"
-          onclick="loadLayout('7misc')"
         >
           <span class="tab-icon"></span>
           <span class="tab-number">7</span>
@@ -168,13 +164,13 @@
 </div>
 
 <div id="push-indicator">PUSH: OFF</div>
-    <script type="module" src="../JS/IRC/ircControllers.js"></script>
-    <script type="module" src="../JS/DIST/distControllers.js"></script>
-    <script type="module" src="../JS/DEV/devControllers.js"></script>
-    <script type="module" src="../JS/MAIN/mainControllers.js"></script>
-    <script type="module" src="../JS/code/codeControllers.js"></script>   
-    <script type="module" src="../JS/misc/miscControllers.js"></script>
-    <script type="module" src="../JS/search/searchControllers.js"></script>  
+    <script type="module" src="../js/irc/ircControllers.js"></script>
+    <script type="module" src="../js/dist/distControllers.js"></script>
+    <script type="module" src="../js/dev/devControllers.js"></script>
+    <script type="module" src="../js/main/mainControllers.js"></script>
+    <script type="module" src="../js/code/codeControllers.js"></script>
+    <script type="module" src="../js/misc/miscControllers.js"></script>
+    <script type="module" src="../js/search/searchControllers.js"></script>
         <!-- <script src="../JS/fuiWindowsBorders.js"></script> -->
 
     <script src="../js/layout.js"></script>

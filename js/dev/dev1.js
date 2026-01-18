@@ -1,268 +1,303 @@
 import { createFUIWindow } from "../core/template.js";
 
-/* ======================
-   CONFIG
-   ====================== */
+/* ============================================
+   IRC STATS (CLEAN + INTERACTIVE)
+   - Scroll respecting user
+   - Header sticky respected
+   - Random permanent highlights
+   - Click & keyboard navigation
+============================================ */
 
-const INTERFACE_NAMES = [
-  "en0",
-  "en1",
-  "en2",
-  "lo0",
-  "awdl0",
-  "utun0",
-  "bridge0",
-  "gif0",
-];
+/* ===============================
+   STATE
+=============================== */
 
-const NETWORK_NAMES = [
-  "localhost",
-  "127.0.0.1",
-  "192.168.1",
-  "<Tunnel>",
-  "<Link#1>",
-  "<Link#2>",
-  "<Link#3>",
-  "<Link#4>",
-  "<Link#5>",
-];
+const system = {
+  cpu: [0.65, 0.36],
+  mem: 0.42,
+  swap: 0.09,
+  tasks: [151, 242],
+  load: [0.9, 0.29, 0.21],
+  buffers: 22,
+  cached: 93,
+  uptime: 34211,
+  processes: [],
+};
 
-const INTERFACE_STATES = ["ACTIVE", "IDLE", "UP", "DOWN", "SECURE"];
+let currentMode = "large";
+let statsTimer = null;
 
-const MAX_INTERFACE_LINES = 44;
+/* ===============================
+   INTERACTIONS STATE
+=============================== */
 
-let interfaceData = [];
-let isInitialized = false;
+let isUserScrolling = false;
+let savedScrollTop = 0;
+const highlightedRows = new Set();
 
-/* ======================
+/* ===============================
+   PROCESS FACTORY
+=============================== */
+
+function createProcess(id) {
+  return {
+    pid: id,
+    user: ["root", "isrg", "user", "daemon", "sys"][
+      Math.floor(Math.random() * 5)
+    ],
+    pri: [10, 20, 30][Math.floor(Math.random() * 3)],
+    ni: Math.floor(Math.random() * 3),
+    virt: Math.floor(4000 + Math.random() * 500000),
+    res: Math.floor(1000 + Math.random() * 50000),
+    shr: Math.floor(500 + Math.random() * 10000),
+    cpu: Math.random() * 5,
+    mem: Math.random() * 2,
+    state: ["R", "S", "D", "I"][Math.floor(Math.random() * 4)],
+    time: `${Math.floor(Math.random() * 99)}:${Math.floor(Math.random() * 59)
+      .toString()
+      .padStart(2, "0")}`,
+    tty: `pts/${Math.floor(Math.random() * 9)}`,
+    command: [
+      "systemd",
+      "kworker",
+      "bash",
+      "python",
+      "node",
+      "firefox",
+      "chrome",
+      "apache2",
+      "mysql",
+      "nginx",
+    ][Math.floor(Math.random() * 10)],
+  };
+}
+
+/* ===============================
+   INIT PROCESS LIST (ONCE)
+=============================== */
+
+if (system.processes.length === 0) {
+  for (let i = 0; i < 60; i++) {
+    system.processes.push(createProcess(2000 + i * 37));
+  }
+
+  // select some rows to be highlighted permanently (3 random)
+  while (highlightedRows.size < 3) {
+    highlightedRows.add(Math.floor(Math.random() * system.processes.length));
+  }
+}
+
+/* ===============================
    HELPERS
-   ====================== */
+=============================== */
 
-function rand(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function drift(v, a = 0.01, min = 0, max = 1) {
+  return Math.max(min, Math.min(max, v + (Math.random() - 0.5) * a));
 }
 
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+function bar(value, max = 0.6, width = 32) {
+  const filled = Math.round((value / max) * width);
+  return "|".repeat(filled).padEnd(width, " ");
 }
 
-function formatUptime(seconds) {
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  return `${days}d ${hours}:${mins.toString().padStart(2, "0")}`;
-}
+/* ===============================
+   SYSTEM UPDATE
+=============================== */
 
-function genMac() {
-  return Array.from({ length: 6 }, () =>
-    rand(0, 255).toString(16).padStart(2, "0"),
-  ).join(":");
-}
+function updateSystem() {
+  system.cpu = system.cpu.map((v) => drift(v, 0.08));
+  system.mem = drift(system.mem, 0.02);
+  system.swap = drift(system.swap, 0.01);
+  system.load = system.load.map((v) => drift(v, 0.04, 0, 5));
+  system.uptime += 1;
 
-function genIPv4() {
-  return `10.${rand(0, 255)}.${rand(0, 255)}.${rand(1, 254)}`;
-}
-
-function genConfig() {
-  const letters = Array.from({ length: 3 }, () =>
-    String.fromCharCode(rand(97, 122)),
-  ).join("");
-
-  return `${letters}-os.config`;
-}
-
-function genfe80() {
-  const num1 = rand(0, 9);
-  const num2 = rand(10, 99);
-  const num3 = rand(100, 999);
-
-  return Math.random() < 0.5
-    ? `fe80:${num1}::${num3},${num2}ff`
-    : `fe80:${num1}::${num1}`;
-}
-
-/* ======================
-   DATA GENERATORS
-   ====================== */
-function genInterfaceName() {
-  const base = pick(INTERFACE_NAMES);
-  const suffix = Math.random() < 0.4 ? `:${rand(1, 9)}` : "";
-  return base + suffix;
-}
-
-function genMTU(name) {
-  if (name === "lo0") return 16384;
-  if (name.startsWith("utun")) return 1380;
-  if (name.startsWith("en")) return 1200;
-  if (name.startsWith("bridge")) return 4070;
-  return 1500;
-}
-
-function genNetwork() {
-  return pick(NETWORK_NAMES);
-}
-
-function genAddress(name) {
-  if (name === "awdl0") return "localhost";
-  if (name.startsWith("utun")) return genConfig();
-  if (name.startsWith("bridge")) return genIPv4();
-  if (name === "en1") return genfe80();
-
-  return genMac();
-}
-
-function createInterfaceRow() {
-  const name = genInterfaceName();
-
-  return {
-    name,
-    mtu: genMTU(name),
-    network: genNetwork(),
-    address: genAddress(name),
-    state: pick(INTERFACE_STATES),
-  };
-}
-
-function generateInterfaces(count = 3) {
-  return Array.from({ length: count }, () => createInterfaceRow());
-}
-
-/* ======================
-   DISK + SYSTEM (FAKE BUT STABLE)
-   ====================== */
-
-function generateDiskStatus() {
-  const size = 60;
-  const used = rand(12, 28) + rand(0, 9) / 10;
-  const avail = (size - used).toFixed(1);
-  const capacity = Math.round((used / size) * 100);
-
-  return {
-    filesystem: "/dev/disk0s2",
-    size,
-    used: used.toFixed(1),
-    avail,
-    capacity,
-  };
-}
-
-function generateUptime() {
-  return formatUptime(rand(20000, 90000));
-}
-
-/* ======================
-   RENDER PARTS
-   ====================== */
-
-function renderDiskStatus() {
-  const d = generateDiskStatus();
-
-  return `
-  <div class="is-section-title">
-  Disk Status:
-
-
-    <div class="is-header disk">
-      <span>Filesystem</span>
-      <span>Size</span>
-      <span>Used</span>
-      <span>Avail</span>
-      <span>Capacity</span>
-    </div>
-
-    <div class="is-row disk">
-      <span>${d.filesystem}</span>
-      <span>${d.size}GB</span>
-      <span>${d.used}GB</span>
-      <span>${d.avail}GB</span>
-      <span>${d.capacity}%</span>
-    </div>
-    </div>
-  `;
-}
-
-function renderInterfaceHeader() {
-  return `
-    <div class="is-section-title2">Network Interface Status:</div>
-
-    <div class="is-header net">
-      <span>Interface</span>
-      <span>MTU</span>
-      <span>Network</span>
-      <span>Address</span>
-      <span>State</span>
-    </div>
-  `;
-}
-
-function renderInterfaces() {
-  let html = "";
-  let linesSinceSpace = 0;
-
-  interfaceData.forEach((i, index) => {
-    if (linesSinceSpace >= rand(3, 6) && index < interfaceData.length - 1) {
-      const spaces = rand(1, 2);
-      html += '<div class="is-spacer"></div>'.repeat(spaces);
-      linesSinceSpace = 0;
-    }
-
-    html += `
-      <div class="is-row net">
-        <span>${i.name}</span>
-        <span>${i.mtu}</span>
-        <span>${i.network}</span>
-        <span>${i.address}</span>
-        <span class="state">${i.state}</span>
-      </div>
-    `;
-
-    linesSinceSpace++;
+  system.processes.forEach((p) => {
+    p.cpu = drift(p.cpu, 0.3, 0, 5);
+    p.mem = drift(p.mem, 0.1, 0, 2);
   });
 
-  return html;
+  system.processes.sort((a, b) => b.cpu - a.cpu);
+
+  // Twitter-like new row
+  const newPid = 2000 + Math.floor(Math.random() * 10000);
+  system.processes.unshift(createProcess(newPid));
+  if (system.processes.length > 60) system.processes.pop();
 }
 
-function renderFooter() {
+/* ===============================
+   RENDER (LARGE)
+=============================== */
+
+function renderStatsLarge() {
+  const totalTasks = system.tasks[0] + system.tasks[1];
+
   return `
-    <div class="is-footer">
-      <span>Uptime: ${generateUptime()}</span>
-      <span>${rand(10, 30)}/60GB (${rand(20, 60)}%)</span>
+<div class="irc-system">
+  <div class="top-stats">
+    <div class="bars">
+      <div>1</div><div>${bar(system.cpu[0])}</div>
+      <div>2</div><div>${bar(system.cpu[1])}</div>
+      <div>Mem</div><div>${bar(system.mem)}</div>
+      <div>Swp</div><div>${bar(system.swap)}</div>
     </div>
-  `;
+
+    <div class="info">
+      <div>${(system.cpu[0] * 100).toFixed(1)}%]</div>
+      <div>Hostname:</div><div>mArc</div>
+      <div>${(system.cpu[1] * 100).toFixed(1)}%]</div>
+      
+      <div>Tasks:</div>
+      <div>${system.tasks[0]},${totalTasks} thr;${system.tasks[1]} running</div>
+
+      <div>${(system.mem * 100).toFixed(1)}%]</div>
+      <div>Load avg:</div>
+      <div>${system.load.map((v) => v.toFixed(2)).join(" ")}</div>
+
+      <div>${(system.swap * 100).toFixed(1)}%]</div>
+      <div>Buffers:</div>
+      <div>${system.buffers}M Cache: ${system.cached}M</div>
+    </div>
+  </div>
+
+  <div class="processes">
+    <div class="header-stats">
+      <span>PID</span><span>USER</span><span>PRI</span><span>NI</span>
+      <span>VIRT</span><span>RES</span><span>SHR</span><span>S</span>
+      <span>CPU%</span><span>MEM%</span><span>TIME+</span>
+      <span>TTY</span><span>COMMAND</span>
+    </div>
+
+    <div class="process-list">
+      ${system.processes
+        .map(
+          (p, i) => `
+      <div class="row ${highlightedRows.has(i) ? "hl" : ""} ${
+        i === 0 ? "hot" : ""
+      }" data-i="${i}">
+        <span>${p.pid}</span>
+        <span>${p.user}</span>
+        <span>${p.pri}</span>
+        <span>${p.ni}</span>
+        <span>${p.virt}</span>
+        <span>${p.res}</span>
+        <span>${p.shr}</span>
+        <span>${p.state}</span>
+        <span>${p.cpu.toFixed(1)}</span>
+        <span>${p.mem.toFixed(1)}</span>
+        <span>${p.time}</span>
+        <span>${p.tty}</span>
+        <span>${p.command}</span>
+      </div>`,
+        )
+        .join("")}
+    </div>
+  </div>
+</div>`;
 }
 
-function pushInterfaceLine() {
-  interfaceData.push(createInterfaceRow());
+/* ===============================
+   RENDER (SMALL)
+=============================== */
 
-  if (interfaceData.length > MAX_INTERFACE_LINES) {
-    interfaceData.shift();
-  }
+function renderStatsSmall() {
+  return `
+<div class="irc-system">
+  <div class="top-stats">
+    <div class="bars">
+      <div>1</div><div>${bar(system.cpu[0])}</div>
+      <div>2</div><div>${bar(system.cpu[1])}</div>
+      <div>Mem</div><div>${bar(system.mem)}</div>
+      <div>Swp</div><div>${bar(system.swap)}</div>
+    </div>
+  </div>
+</div>`;
 }
 
-/* ======================
+/* ===============================
+   INTERACTIONS
+=============================== */
+
+function setupInteractions() {
+  const root = document.getElementById("dev-1");
+  if (!root) return;
+
+  const list = root.querySelector(".process-list");
+  if (!list) return;
+
+  list.style.overflowY = "auto";
+  list.tabIndex = 0;
+  list.scrollTop = savedScrollTop;
+
+  // Scroll detection
+  list.addEventListener("scroll", () => {
+    isUserScrolling = true;
+    savedScrollTop = list.scrollTop;
+  });
+
+  // Keyboard navigation
+  list.addEventListener("keydown", (e) => {
+    if (e.code === "ArrowDown") {
+      list.scrollTop += 24;
+      savedScrollTop = list.scrollTop;
+      e.preventDefault();
+    }
+    if (e.code === "ArrowUp") {
+      list.scrollTop -= 24;
+      savedScrollTop = list.scrollTop;
+      e.preventDefault();
+    }
+  });
+
+  // Row highlight click
+  list.querySelectorAll(".row").forEach((row) => {
+    const i = Number(row.dataset.i);
+    row.addEventListener("click", () => {
+      if (highlightedRows.has(i)) highlightedRows.delete(i);
+      else highlightedRows.add(i);
+      render();
+      // keep scroll position
+      list.scrollTop = savedScrollTop;
+    });
+  });
+}
+
+/* ===============================
    MAIN RENDER
-   ====================== */
+=============================== */
 
-function render() {
-  if (!isInitialized) {
-    interfaceData = generateInterfaces(MAX_INTERFACE_LINES);
-    isInitialized = true;
-  }
+export function render() {
+  updateSystem();
 
-  return `
-    <div class="interface-status">
-      ${renderDiskStatus()}
-      ${renderInterfaceHeader()}
-      <div class="is-body">
-        ${renderInterfaces()}
-      </div>
-      ${renderFooter()}
-    </div>
-  `;
+  const el = document.getElementById("dev-1");
+  if (!el) return;
+
+  const prevScrollTop =
+    el.querySelector(".process-list")?.scrollTop || savedScrollTop;
+
+  el.innerHTML =
+    currentMode === "small" ? renderStatsSmall() : renderStatsLarge();
+
+  if (currentMode === "large") setupInteractions();
+
+  // restore scroll position if user scrolled
+  const list = el.querySelector(".process-list");
+  if (list) list.scrollTop = isUserScrolling ? savedScrollTop : 0;
 }
 
-function update() {
-  pushInterfaceLine();
+/* ===============================
+   PUBLIC CONTROL API
+=============================== */
+
+export function startIRCStats() {
+  if (statsTimer) return;
+
+  statsTimer = setInterval(renderIRCStats, 2000);
+}
+
+export function stopIRCStats() {
+  if (!statsTimer) return;
+  clearInterval(statsTimer);
+  statsTimer = null;
 }
 
 const dev1Window = createFUIWindow({
@@ -279,4 +314,8 @@ export function startDev1() {
 
 export function stopDev1() {
   dev1Window.stop();
+}
+
+function update() {
+  pushInterfaceLine();
 }

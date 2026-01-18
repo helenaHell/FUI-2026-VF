@@ -190,7 +190,7 @@ function renderDiskStatus() {
 
 function renderInterfaceHeader() {
   return `
-    <div class="is-section-title2">Network Interface Status:</div>
+    <div class="is-section-title2">Network Interface Status:
 
     <div class="is-header net">
       <span>Interface</span>
@@ -198,6 +198,7 @@ function renderInterfaceHeader() {
       <span>Network</span>
       <span>Address</span>
       <span>State</span>
+      </div>
     </div>
   `;
 }

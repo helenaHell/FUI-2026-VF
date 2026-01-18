@@ -73,19 +73,36 @@ const layouts = {
   },
 
   "6dev": {
-    "dev-editor": { col: 1, row: 1, w: 2, h: 2 },
-    "dev-terminal": { col: 3, row: 1, w: 1, h: 1 },
-    "dev-logs": { col: 1, row: 2, w: 1, h: 1 },
-    "dev-1": { col: 3, row: 2, w: 1, h: 1 },
+    "dev-editor": { col: 1, row: 1, w: 2, h: 1 },
+    "dev-terminal": { col: 3, row: 1, w: 1, h: 2 },
+    "dev-logs": { col: 2, row: 2, w: 1, h: 1 },
+    "dev-1": { col: 1, row: 2, w: 1, h: 1 },
   },
 
   "7misc": {
-    "misc-1": { col: 1, row: 1, w: 2, h: 2 },
-    "misc-2": { col: 3, row: 1, w: 1, h: 1 },
-    "misc-3": { col: 1, row: 2, w: 1, h: 1 },
-    "misc-4": { col: 2, row: 2, w: 1, h: 1 },
+    "misc-1": { col: 1, row: 1, w: 1, h: 2 },
+    "misc-2": { col: 2, row: 1, w: 2, h: 1 },
   },
 };
+
+document.addEventListener(
+  "mousedown",
+  (e) => {
+    if (layoutEditMode) return;
+
+    const winEl = e.target.closest(".fui-window");
+    if (!winEl) return;
+
+    const id = winEl.id;
+    if (!id || !layoutState[id]) return;
+
+    if (activeWindowId !== id) {
+      activeWindowId = id;
+      renderLayout();
+    }
+  },
+  true,
+);
 
 function buildOccupancyGrid(ignoreId = null) {
   const grid = Array.from({ length: GRID_ROWS }, () =>

@@ -1,4 +1,5 @@
 import { createFUIWindow } from "../core/template.js";
+import { isWindowActive } from "../core/utils.js";
 
 /* =====================
    TAGS
@@ -88,8 +89,7 @@ function updateMessages() {
 let chatDirty = false;
 
 document.addEventListener("keydown", (e) => {
-  const win = document.getElementById("irc-chat");
-  if (!win || !win.classList.contains("locked")) return;
+  if (!isWindowActive("irc-chat")) return;
 
   e.preventDefault();
 

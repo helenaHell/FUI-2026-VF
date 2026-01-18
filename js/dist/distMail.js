@@ -1,4 +1,5 @@
 import { createFUIWindow } from "../core/template.js";
+import { isWindowActive } from "../core/utils.js";
 
 const emailDatabase = [
   {
@@ -97,13 +98,7 @@ function createEmail(previousDate = null) {
 }
 
 function handleMailKeydown(e) {
-  const distMailWindow = document.getElementById("dist-mail");
-  if (
-    !distMailWindow ||
-    !distMailWindow.classList.contains("locked") ||
-    document.body.classList.contains("layout-edit")
-  )
-    return;
+  if (!isWindowActive("dist-mail")) return;
 
   const { mode, selectedIndex, emails } = mailState;
 

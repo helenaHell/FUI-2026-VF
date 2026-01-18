@@ -29,6 +29,7 @@
   position: relative;
   border: 2px solid var(--border-windows) !important;
   background-color: var(--color-black) !important;
+  /* background: red; */
   overflow: auto;
   opacity: 0.8;
   padding: 0px !important;
@@ -67,11 +68,12 @@ oksour
 
 .layout-edit .fui-window {
   opacity: 0.6;
-  background: rgba(40, 61, 32, 0.743);
+  background: rgb(255, 0, 0);
 }
-*/ .fui-window::before {
+
+/* .fui-window::before {
   content: attr(data-title);
-}
+} */
 
 .fui-window.active {
   opacity: 0.5;
@@ -84,7 +86,7 @@ oksour
    =============================== */
 
 .fui-window.active {
-  border: 2px solid #ff8c00 !important;
+  border: 2px solid #ff0000 !important;
   box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
 }
 

@@ -8,6 +8,8 @@ import { startDev1, stopDev1 } from "./dev1.js";
 // =====================
 
 function startDEV() {
+  if (startDEV.__running) return;
+  startDEV.__running = true;
   startDevTerminal();
   startDevLogs();
   startDevEditor();
@@ -15,6 +17,8 @@ function startDEV() {
 }
 
 function stopDEV() {
+  if (!startDEV.__running) return;
+  startDEV.__running = false;
   stopDevTerminal();
   stopDevLogs();
   stopDevEditor();
