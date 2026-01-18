@@ -1,0 +1,541 @@
+/* ===============================
+   SHARED STYLES
+   =============================== */
+
+.intel-container,
+.ops-container,
+.comms-container,
+.network-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  color: var(--color-text-main);
+  background: var(--color-black);
+  overflow: hidden;
+}
+
+/* HEADERS */
+.intel-header,
+.ops-header,
+.comms-header,
+.network-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 6px;
+  background: var(--bg-green);
+  border-bottom: 1px solid var(--main-green);
+}
+
+.intel-title,
+.ops-title,
+.comms-title,
+.network-title {
+  color: var(--text-glow);
+  letter-spacing: 1px;
+}
+
+.intel-time,
+.ops-time,
+.comms-time,
+.network-time {
+  color: var(--text-bright);
+}
+
+/* FILTERS */
+.intel-filters,
+.ops-sort,
+.comms-filters,
+.network-filters,
+.network-view {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.filter-item,
+.sort-item,
+.view-item {
+  padding: 1px 4px;
+  color: var(--text-glow);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.filter-item:hover,
+.sort-item:hover,
+.view-item:hover {
+  background: var(--bg-transparent-green);
+}
+
+.filter-item.active,
+.sort-item.active,
+.view-item.active {
+  color: var(--color-black);
+  background: var(--color-text-main);
+  border-color: var(--color-text-main);
+}
+
+.filter-sep {
+  color: var(--dark-green);
+  margin: 0 2px;
+}
+
+.sort-label {
+  color: var(--text-glow2);
+  margin-right: 2px;
+}
+
+/* BODY */
+.intel-body,
+.ops-body,
+.comms-body,
+.network-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  overflow: hidden;
+  padding: 2px;
+}
+
+/* LEFT PANELS */
+.intel-left,
+.ops-left,
+.comms-left {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.network-left {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* LIST HEADERS */
+.intel-list-header,
+.ops-list-header,
+.channel-list-header,
+.node-list-header {
+  display: grid;
+  padding: 2px 4px;
+  background: var(--dark-green);
+  border: 1px solid var(--main-green);
+  color: var(--text-glow2);
+}
+
+.intel-list-header {
+  grid-template-columns: 60px 1fr 80px 50px 20px 60px;
+}
+
+.ops-list-header {
+  grid-template-columns: 70px 1fr 60px 80px 60px;
+}
+
+.channel-list-header {
+  grid-template-columns: 50px 60px 60px 60px 60px 40px 20px;
+}
+
+.node-list-header {
+  grid-template-columns: 50px 1fr 70px 70px 40px 60px;
+}
+
+/* LISTS */
+.intel-list,
+.ops-list,
+.channel-list,
+.node-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* ROWS */
+.intel-row,
+.ops-row,
+.channel-row,
+.node-row {
+  display: grid;
+  padding: 2px 4px;
+  border-left: 2px solid transparent;
+  color: var(--color-text-main);
+  cursor: pointer;
+}
+
+.intel-row {
+  grid-template-columns: 60px 1fr 80px 50px 20px 60px;
+}
+
+.ops-row {
+  grid-template-columns: 70px 1fr 60px 80px 60px;
+}
+
+.channel-row {
+  grid-template-columns: 50px 60px 60px 60px 60px 40px 20px;
+}
+
+.node-row {
+  grid-template-columns: 50px 1fr 70px 70px 40px 60px;
+}
+
+.intel-row:hover,
+.ops-row:hover,
+.channel-row:hover,
+.node-row:hover {
+  background: var(--bg-transparent-green);
+}
+
+.intel-row.selected,
+.ops-row.selected,
+.channel-row.selected,
+.node-row.selected {
+  background: var(--bg-green);
+  border-left-color: var(--color-text-main);
+}
+
+/* PROGRESS BARS */
+.intel-level,
+.ops-progress,
+.ch-signal,
+.node-load {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.intel-bar,
+.ops-bar,
+.ch-bar,
+.node-bar {
+  position: absolute;
+  left: 0;
+  height: 100%;
+  background: var(--bg-green2);
+  opacity: 0.4;
+}
+
+.intel-val,
+.ops-val,
+.ch-val,
+.node-val {
+  position: relative;
+  z-index: 1;
+  color: var(--text-glow);
+}
+
+/* RIGHT PANELS */
+.intel-right,
+.ops-right,
+.comms-right,
+.network-right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.intel-detail,
+.ops-detail,
+.comms-detail,
+.network-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--dark-green);
+  border: 1px solid var(--main-green);
+}
+
+/* DETAIL SECTIONS */
+.detail-section {
+  margin-bottom: 6px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 1px 2px;
+  gap: 8px;
+}
+
+.detail-label {
+  color: var(--text-glow2);
+}
+
+.detail-value {
+  color: var(--color-text-main);
+  text-align: right;
+}
+
+.detail-section-title {
+  color: var(--text-glow);
+  padding: 2px 2px;
+  background: var(--bg-green);
+  border-left: 2px solid var(--color-text-main);
+  margin-bottom: 2px;
+}
+
+/* NOTES / MESSAGES / TIMELINE */
+.intel-notes,
+.comms-messages,
+.ops-timeline,
+.node-connections,
+.activity-log {
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.intel-note,
+.message-item,
+.timeline-event,
+.connection-item,
+.activity-item {
+  padding: 2px 4px;
+  border-left: 1px solid var(--main-green);
+  margin-bottom: 2px;
+}
+
+.note-time,
+.msg-time,
+.event-time,
+.activity-time {
+  color: var(--text-glow2);
+  margin-right: 4px;
+}
+
+.note-text,
+.message-text,
+.event-text,
+.activity-text {
+  color: var(--color-text-main);
+}
+
+/* MESSAGE HEADERS */
+.message-header {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1px;
+}
+
+.msg-from,
+.activity-node {
+  color: var(--text-bright);
+}
+
+.msg-type {
+  margin-left: auto;
+}
+
+/* RESOURCES (OPS) */
+.ops-resources {
+  padding: 4px;
+  background: var(--dark-green);
+  border: 1px solid var(--main-green);
+  margin-top: 2px;
+}
+
+.resource-title {
+  color: var(--text-glow);
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--main-green);
+}
+
+.resource-row {
+  display: flex;
+  gap: 4px;
+  padding: 1px 2px;
+}
+
+.resource-label {
+  color: var(--text-glow2);
+  width: 70px;
+}
+
+.resource-avail {
+  color: var(--color-text-main);
+}
+
+.resource-deployed {
+  color: var(--text-bright);
+}
+
+.resource-total {
+  color: var(--text-glow);
+}
+
+.resource-sep {
+  color: var(--dark-green);
+}
+
+/* COMMS MODE */
+.comms-mode {
+  padding: 1px 4px;
+  color: var(--text-glow);
+  cursor: pointer;
+  border: 1px solid var(--main-green);
+}
+
+.comms-mode:hover {
+  background: var(--bg-transparent-green);
+}
+
+.comms-mode.active {
+  background: var(--tab-active-bg);
+  color: var(--color-black);
+}
+
+/* TRAFFIC VIEW */
+.traffic-view {
+  display: flex;
+  flex-direction: column;
+  grid-column: 1 / -1;
+  overflow: hidden;
+  padding: 2px;
+}
+
+.traffic-header {
+  display: grid;
+  grid-template-columns: 80px 80px 80px 80px 70px;
+  padding: 2px 4px;
+  background: var(--dark-green);
+  border: 1px solid var(--main-green);
+  color: var(--text-glow2);
+}
+
+.traffic-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.traffic-row {
+  display: grid;
+  grid-template-columns: 80px 80px 80px 80px 70px;
+  padding: 2px 4px;
+  border-left: 2px solid transparent;
+  color: var(--color-text-main);
+}
+
+.traffic-row:hover {
+  background: var(--bg-transparent-green);
+}
+
+.activity-section {
+  margin-top: 4px;
+  padding: 4px;
+  background: var(--dark-green);
+  border: 1px solid var(--main-green);
+}
+
+.activity-title {
+  color: var(--text-glow);
+  margin-bottom: 2px;
+  border-bottom: 1px solid var(--main-green);
+}
+
+/* FOOTERS */
+.intel-footer,
+.ops-footer,
+.comms-footer,
+.network-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 6px;
+  background: var(--dark-green);
+  border-top: 1px solid var(--main-green);
+  color: var(--text-glow2);
+}
+
+/* ACTIONS */
+.detail-actions {
+  margin-top: auto;
+  padding: 2px 4px;
+  background: var(--bg-green);
+  border-top: 1px solid var(--main-green);
+}
+
+.action-hint {
+  color: var(--text-glow2);
+}
+
+/* EMPTY STATES */
+.intel-empty,
+.ops-empty,
+.comms-empty,
+.network-empty {
+  padding: 8px;
+  color: var(--text-glow2);
+  text-align: center;
+}
+
+/* SCROLLBARS */
+.intel-list::-webkit-scrollbar,
+.ops-list::-webkit-scrollbar,
+.channel-list::-webkit-scrollbar,
+.node-list::-webkit-scrollbar,
+.intel-detail::-webkit-scrollbar,
+.ops-detail::-webkit-scrollbar,
+.comms-detail::-webkit-scrollbar,
+.network-detail::-webkit-scrollbar,
+.intel-notes::-webkit-scrollbar,
+.comms-messages::-webkit-scrollbar,
+.ops-timeline::-webkit-scrollbar,
+.node-connections::-webkit-scrollbar,
+.traffic-list::-webkit-scrollbar,
+.activity-log::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.intel-list::-webkit-scrollbar-track,
+.ops-list::-webkit-scrollbar-track,
+.channel-list::-webkit-scrollbar-track,
+.node-list::-webkit-scrollbar-track,
+.intel-detail::-webkit-scrollbar-track,
+.ops-detail::-webkit-scrollbar-track,
+.comms-detail::-webkit-scrollbar-track,
+.network-detail::-webkit-scrollbar-track,
+.intel-notes::-webkit-scrollbar-track,
+.comms-messages::-webkit-scrollbar-track,
+.ops-timeline::-webkit-scrollbar-track,
+.node-connections::-webkit-scrollbar-track,
+.traffic-list::-webkit-scrollbar-track,
+.activity-log::-webkit-scrollbar-track {
+  background: var(--color-black);
+}
+
+.intel-list::-webkit-scrollbar-thumb,
+.ops-list::-webkit-scrollbar-thumb,
+.channel-list::-webkit-scrollbar-thumb,
+.node-list::-webkit-scrollbar-thumb,
+.intel-detail::-webkit-scrollbar-thumb,
+.ops-detail::-webkit-scrollbar-thumb,
+.comms-detail::-webkit-scrollbar-thumb,
+.network-detail::-webkit-scrollbar-thumb,
+.intel-notes::-webkit-scrollbar-thumb,
+.comms-messages::-webkit-scrollbar-thumb,
+.ops-timeline::-webkit-scrollbar-thumb,
+.node-connections::-webkit-scrollbar-thumb,
+.traffic-list::-webkit-scrollbar-thumb,
+.activity-log::-webkit-scrollbar-thumb {
+  background: var(--main-green);
+}
+
+.intel-list::-webkit-scrollbar-thumb:hover,
+.ops-list::-webkit-scrollbar-thumb:hover,
+.channel-list::-webkit-scrollbar-thumb:hover,
+.node-list::-webkit-scrollbar-thumb:hover,
+.intel-detail::-webkit-scrollbar-thumb:hover,
+.ops-detail::-webkit-scrollbar-thumb:hover,
+.comms-detail::-webkit-scrollbar-thumb:hover,
+.network-detail::-webkit-scrollbar-thumb:hover,
+.intel-notes::-webkit-scrollbar-thumb:hover,
+.comms-messages::-webkit-scrollbar-thumb:hover,
+.ops-timeline::-webkit-scrollbar-thumb:hover,
+.node-connections::-webkit-scrollbar-thumb:hover,
+.traffic-list::-webkit-scrollbar-thumb:hover,
+.activity-log::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-main);
+}

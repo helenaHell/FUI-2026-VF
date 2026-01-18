@@ -1,0 +1,300 @@
+/* =====================================================
+   ROOT COLORS — SINGLE SOURCE OF TRUTH
+===================================================== */
+
+:root {
+  /* Base Colors */
+  --color-black: #000000a8;
+  --color-white: #ffffff;
+  --color-bg-main: #000f0a;
+
+  /* Green Palette */
+  --green-primary: #00ff88;
+  --green-secondary: #0eac43;
+  --green-bright: #9cff9c;
+  --green-glow: #6aff6a;
+  --green-dark: #075430;
+  --green-dim: #1c7a5a;
+  --green-muted: #0e4f39;
+  --green-highlight: #00d3279f;
+  --green-transparent: #00ff8840;
+
+  /* Text Colors */
+  --text-primary: #00ff88;
+  --text-white: #eafff6;
+  --text-dim: #1c7a5a;
+  --text-muted: #0e4f39;
+  --text-glow: #9cff9c;
+  --text-glow-bright: #6aff6a;
+
+  /* Background Colors */
+  --bg-black: var(--color-black);
+  --bg-bars: var(--color-bg-main);
+  --bg-green: #075430;
+  --bg-green-transparent: #00ff8840;
+  --bg-Dgreen: var(--green-dark);
+
+  /* Border Colors */
+  --border-soft: rgba(0, 255, 136, 0.15);
+  --border-medium: rgba(0, 255, 136, 0.3);
+  --border-hard: rgba(0, 255, 136, 0.5);
+
+  /* State Colors */
+  --tab-active-bg: #00d3279f;
+  --main-green: #0eac43;
+
+  /* Legacy Aliases (for backward compatibility) */
+  --color-text-main: var(--text-primary);
+  --color-border-soft: var(--border-soft);
+  --color-border-hard: var(--border-medium);
+
+  /*___________________________________
+  --color-bg-absolute: #ff0606;
+  --color-bg-main: #00ffa2;
+  ___________________________________*/
+
+  --color-bg-bars: #000f0a; /* bg-tab // Text-under-hightlight */
+
+  --color-text-dim: #1c7a5a;
+  --color-text-muted: #0e4f39;
+  --color-text-white: #eafff6;
+
+  --color-border-soft: rgba(0, 255, 136, 0.15);
+  --color-border-hard: rgba(0, 255, 136, 0.3);
+
+  --border-windows: rgb(159, 173, 157);
+
+  /* COLROS */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  --tab-active-bg: #00d3279f; /* highlighted bg tab + bg performance stats */
+  --main-green: #10963c; /* text button tab (without higlight) + text secondary bar */
+
+  /* HIGHLIGHT */
+  --bg-transparent-green: #00ff8840;
+  --bg-green: #0d4623; /* hl IRCstats / hl headerDISTadresse */
+
+  --dark-green: #09300f;
+  --bg-green2: #348b3a;
+
+  --color-text-main: #00ff40; /* !!Bien aussi pour main text  */
+  --text-bright: #00ff00b3;
+
+  /* GLOW */
+  --text-glow: #9cff9c;
+  --text-glow2: #6aff6a;
+
+  /* IRC :/ glow / main-green / bg- green / dark green */
+}
+
+/* =====================================================
+   GLOBAL RESET
+===================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: monospace;
+  font-size: 13px;
+  color: var(--color-text-main);
+  overflow: hidden;
+}
+
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  background-image: url("../assets/bg-CC.png");
+  background-color: var(--color-bg-bars);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+/* .bottom-bar {
+  position: absolute;
+  bottom: 0;  
+  left: 0;
+  right: 0;
+}
+.fb-footer-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+} */
+
+/* =====================================================
+   TOP BAR — TABS + STATS
+===================================================== */
+#top-bar {
+  height: 23px;
+  background: var(--color-black);
+  /* opacity: 0.96; */
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  border-bottom: 1.5px solid var(--tab-active-bg);
+}
+
+/* ---------------- TABS ---------------- */
+#tabs {
+  display: flex;
+  height: 100%;
+}
+
+#tabs button {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 100%;
+  color: var(--main-green);
+  cursor: pointer;
+  border-right: 1px solid var(--color-border-soft);
+}
+
+#tabs button:last-child {
+  border-right: none;
+}
+
+/* small square indicator */
+.tab-icon {
+  width: 6px;
+  height: 6px;
+  margin-bottom: 10px;
+  border: 1px solid var(--color-text-white);
+}
+
+/* number */
+.tab-number {
+  color: var(--color-text-white);
+}
+
+/* label */
+.tab-label {
+  color: var(--color-text-main);
+}
+
+/* ACTIVE TAB — movie accurate */
+#tabs button.active {
+  background: var(--main-green);
+}
+
+#tabs button.active .tab-number,
+#tabs button.active .tab-label {
+  color: var(--text-glow2);
+}
+
+#tabs button.active .tab-icon {
+  background: var(--color-text-white);
+  /* border-color: var(--color-text-white); */
+}
+
+/* ---------------- PERFORMANCE STATS ---------------- */
+#performance-stats {
+  background: var(--tab-active-bg);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 10px;
+  /* color: var(--color-text-dim); */
+  color: var(--text-glow2);
+}
+
+#performance-stats span {
+  white-space: nowrap;
+  padding-right: 18px;
+  border-right: 1px solid var(--text-glow2);
+}
+
+#performance-stats span:last-child {
+  border-right: none;
+}
+
+/* =====================================================
+   SECONDARY BAR — SESSION / STATUS
+===================================================== */
+#secondary-bar {
+  background: transparent;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  padding-left: 8px;
+  padding-top: 10px;
+}
+
+.status-label {
+  color: var(--text-glow);
+}
+
+/* =====================================================
+   FOOTER BAR (ALWAYS VISIBLE)
+===================================================== */
+#footer-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-black);
+  opacity: 0.8;
+  padding: 6px 12px;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.footer-tip {
+  color: var(--tab-active-bg);
+  padding-top: 1px;
+}
+
+.footer-function-keys {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 5px;
+  border-top: 1px solid var(--tab-active-bg);
+  /* gap: 5px; */
+}
+
+.fkey-num {
+  color: var(--text-glow2);
+}
+
+.fkey-label {
+  background-color: var(--tab-active-bg);
+  color: var(--color-white);
+  padding: 2px 0px;
+}
+
+#push-indicator {
+  position: fixed;
+  bottom: 12px;
+  right: 12px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: monospace;
+  background: #111;
+  color: #777;
+  border: 1px solid #333;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+body.push-on #push-indicator {
+  color: #0f0;
+  border-color: #0f0;
+  opacity: 1;
+}

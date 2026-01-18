@@ -1,0 +1,147 @@
+/* ===============================
+   SEARCH FILES
+=============================== */
+
+.files-container {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.fb-header,
+.fb-row,
+.fb-body-separators {
+  display: grid;
+  grid-template-columns: 1px 2fr 120px 120px;
+  align-items: center;
+}
+
+.fb-header {
+  font-weight: bold;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+}
+
+.fb-h-n {
+  text-align: left;
+}
+
+.fb-h-name {
+  text-align: left;
+  padding-left: 10vw;
+}
+
+.fb-h-size {
+  text-align: right;
+  padding-right: 1vw;
+}
+
+.fb-h-modify {
+  text-align: center;
+}
+
+/* Scroll */
+.fb-body {
+  position: relative;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin-bottom: 80px; /* Space pour le footer fixe */
+  z-index: 1;
+}
+
+.fb-row {
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: background-color 0.15s;
+}
+
+.fb-row:hover {
+  background: var(--text-glow);
+  color: var(--color-bg-bars);
+}
+
+.fb-row.selected {
+  /* background: rgba(255, 140, 0, 0.3); */
+  color: var(--text-glow);
+  outline: 1px solid #8eff9f;
+}
+
+.fb-n {
+  padding-left: 1px;
+}
+
+.fb-name {
+  padding: 2px 6px;
+  text-align: left;
+}
+
+.fb-size {
+  padding: 2px 6px;
+  text-align: right;
+}
+
+.fb-modify {
+  padding: 2px 6px;
+  text-align: center;
+}
+
+/* Separators */
+.fb-body-separators {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* Footer FIXE */
+.fb-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-bg-bars);
+  z-index: 3;
+  padding: 0px 2px;
+}
+
+.fb-body-separators .fb-sep-line {
+  position: absolute;
+  top: -10px; /* Remonte jusqu'au header */
+  bottom: -80px; /* Descend jusqu'au bas du footer */
+  width: 1px;
+  background: var(--bg-Dgreen);
+  pointer-events: none;
+}
+
+.fb-body-separators .fb-sep-line:first-of-type {
+  grid-column: 3; /* Entre Name et Size */
+}
+
+.fb-body-separators .fb-sep-line:last-of-type {
+  grid-column: 4; /* Entre Size et Modify */
+}
+
+.fb-line {
+  height: 1px;
+  background: var(--text-white);
+  /* opacity: 0.7; */
+}
+
+.fb-line.short {
+  width: 70%;
+}
+
+.fb-line-data {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}

@@ -1,0 +1,41 @@
+/* ===============================
+    SENSITIVE WORDS
+   =============================== */
+
+/* .highlight {
+  color: #ff3b3b;
+  font-weight: 600;
+  text-shadow: 0 0 6px rgba(255, 59, 59, 0.6);
+} */
+
+/* ===============================
+    SCROLL
+   =============================== */
+
+.fui-scroll {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.autoterminal {
+  white-space: pre-wrap;
+  font-family: monospace;
+  line-height: 1.3;
+}
+
+/* ===============================
+   =============================== */
+
+.tag {
+  background: rgba(0, 255, 0, 0.15);
+  padding: 0 2px;
+}
+.separator {
+  border-top: 1px solid rgba(0, 255, 0, 0.3);
+  margin: 4px 0;
+}
+
+.devdata .row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}

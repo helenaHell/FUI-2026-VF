@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>#4782742_dev</title>
+    <link rel="stylesheet" href="../css/mainBase.css" />
+    <link rel="stylesheet" href="../css/fuiWindows.css" />
+    <link rel="stylesheet" href="../css/tabs/IRC.css" />
+    <link rel="stylesheet" href="../css/tabs/DEV.css" />
+    <link rel="stylesheet" href="../css/tabs/MAIN.css" />
+    <link rel="stylesheet" href="../css/tabs/DIST.css" />
+    <link rel="stylesheet" href="../css/tabs/CODE.css" />
+    <link rel="stylesheet" href="../css/tabs/MISC.css" />
+    <link rel="stylesheet" href="../css/tabs/general.css" />
+   <link rel="stylesheet" href="../css/tabs/SEARCH.css" />
+
+  </head>
+  <body>
+    <div id="background"></div>
+    <!-- TOP BAR (tabs + stats) -->
+    <div id="top-bar">
+      <div id="tabs">
+        <button
+          data-tab="1main"
+          data-key="Digit1"
+          onclick="loadLayout('1main')"
+        >
+          <span class="tab-icon"></span>
+          <span class="tab-number">1</span>
+          <span class="tab-label">:main</span>
+        </button>
+        <button
+          data-tab="2code"
+          data-key="Digit2"
+          onclick="loadLayout('2code')"
+        >
+          <span class="tab-icon"></span>
+          <span class="tab-number">2</span>
+          <span class="tab-label">:code</span>
+        </button>
+        <button
+          data-tab="3dist"
+          data-key="Digit3"
+          onclick="loadLayout('3dist')"
+        >
+          <span class="tab-icon"></span>
+          <span class="tab-number">3</span>
+          <span class="tab-label">:dist</span>
+        </button>
+        <button data-tab="4irc" data-key="Digit4" onclick="loadLayout('4irc')">
+          <span class="tab-icon"></span>
+          <span class="tab-number">4</span>
+          <span class="tab-label">:irc</span>
+        </button>
+
+         <button data-tab="5search" data-key="Digit5" onclick="loadLayout('5search')">
+          <span class="tab-icon"></span>
+          <span class="tab-number">5</span>
+          <span class="tab-label">:search</span>
+        </button>
+
+        <button data-tab="6dev" data-key="Digit6" onclick="loadLayout('6dev')">
+          <span class="tab-icon"></span>
+          <span class="tab-number">6</span>
+          <span class="tab-label">:dev</span>
+        </button>
+        <button
+          data-tab="7misc"
+          data-key="Digit7"
+          onclick="loadLayout('7misc')"
+        >
+          <span class="tab-icon"></span>
+          <span class="tab-number">7</span>
+          <span class="tab-label">:misc</span>
+        </button>
+      </div>
+
+      <div id="performance-stats">
+        <span id="stat-langue">en</span>
+        <span id="stat-wifi">WIFI: Li: 32 Si: 18</span>
+        <span id="stat-cpu">CPU 12%</span>
+        <span id="stat-ram">RAM 768mb</span>
+        <span id="stat-vol">VOL 11</span>
+        <span id="stat-bat">BAT 74%</span>
+      </div>
+    </div>
+
+    <!-- SECONDARY BAR (session/status) -->
+    <div id="secondary-bar">
+      <span class="status-label">[NEW]</span>
+      <span class="separator">|</span>
+      <span class="status-item">0</span>
+      <span class="separator">|</span>
+      <span class="status-item">1</span>
+      <span class="separator">|</span>
+      <span class="status-item">2</span>
+      <span class="separator">|</span>
+      <span class="status-item">3</span>
+      <span class="separator">|</span>
+      <span class="status-info">admin@sysoadmin ~ ...</span>
+    </div>
+
+    <div id="workspace">
+
+      <!-- MAIN TAB -->
+<div class="fui-window" id="main-network"></div>
+<div class="fui-window" id="main-ops"></div>
+<div class="fui-window" id="main-intel"></div>
+<div class="fui-window" id="main-comms"></div>
+<!-- <div class="fui-window" id="main-globe"></div> -->
+
+      <!-- CODE TAB -->
+      <div class="fui-window" id="code-1"></div>
+      <div class="fui-window" id="code-2"></div>
+      <div class="fui-window" id="code-3"></div>
+      <div class="fui-window" id="code-4"></div>
+      <div class="fui-window" id="code-5"></div>
+
+      <!-- DIST TAB -->
+      <div class="fui-window" id="dist-mail"></div>
+      <div class="fui-window" id="dist-docs"></div>
+      <div class="fui-window" id="dist-files"></div>
+      <div class="fui-window" id="dist-addresses"></div>
+
+      <!-- IRC TAB -->
+      <div class="fui-window" id="irc-chat"></div>
+      <div class="fui-window" id="irc-stats"></div>
+      <div class="fui-window" id="irc-twitter"></div>
+      <div class="fui-window" id="irc-InterfaceStatus"></div>
+
+    <!-- SEARCH TAB -->
+      <div class="fui-window" id="search-1"></div>
+      <div class="fui-window" id="search-2"></div>
+
+      <!-- DEV TAB -->
+      <div class="fui-window" id="dev-terminal"></div>
+      <div class="fui-window" id="dev-logs"></div>
+      <div class="fui-window" id="dev-editor"></div>
+      <div class="fui-window" id="dev-1"></div>
+
+      <!-- MISC -->
+      <div class="fui-window" id="misc-1"></div>
+      <div class="fui-window" id="misc-2"></div>
+    </div>
+
+    <!-- BOTTOM BAR (function keys + tip) -->
+   <div id="footer-bar">
+  <div class="footer-tip">
+    <!-- Tip: Use M-p and M-n to access the command history. -->
+     Tips: Use ⎇Alt + ⭠⭡⭢⭣ to lock in window, ⌘cmd to enable or disable edit mode, hold ⇧Maj + ⭠⭡⭢⭣ for resizing, ⇧Maj + number to change tabs
+  </div>
+<div class="footer-function-keys">
+  <span class="fkey"><span class="fkey-num">F1</span><span class="fkey-label">Help</span></span>
+  <span class="fkey"><span class="fkey-num">F2</span><span class="fkey-label">Menu</span></span>
+  <span class="fkey"><span class="fkey-num">F3</span><span class="fkey-label">View</span></span>
+  <span class="fkey"><span class="fkey-num">F4</span><span class="fkey-label">Edit</span></span>
+  <span class="fkey"><span class="fkey-num">F5</span><span class="fkey-label">Copy</span></span>
+  <span class="fkey"><span class="fkey-num">F6</span><span class="fkey-label">RenMov</span></span>
+  <span class="fkey"><span class="fkey-num">F7</span><span class="fkey-label">Mkdir</span></span>
+  <span class="fkey"><span class="fkey-num">F8</span><span class="fkey-label">Delete</span></span>
+  <span class="fkey"><span class="fkey-num">F9</span><span class="fkey-label">PullDn</span></span>
+  <span class="fkey"><span class="fkey-num">F10</span><span class="fkey-label">Debug</span></span>
+  <span class="fkey"><span class="fkey-num">F11</span><span class="fkey-label">Root</span></span>
+<span class="fkey"><span class="fkey-num">F12</span><span class="fkey-label">Shell</span></span>  <!--  access root/admin  -->
+  <span class="fkey"><span class="fkey-num">●</span><span class="fkey-label">Exec</span></span>
+  <span class="fkey"><span class="fkey-num">○</span><span class="fkey-label">Log</span></span>
+</div>
+
+<div id="push-indicator">PUSH: OFF</div>
+    <script type="module" src="../JS/IRC/ircControllers.js"></script>
+    <script type="module" src="../JS/DIST/distControllers.js"></script>
+    <script type="module" src="../JS/DEV/devControllers.js"></script>
+    <script type="module" src="../JS/MAIN/mainControllers.js"></script>
+    <script type="module" src="../JS/code/codeControllers.js"></script>   
+    <script type="module" src="../JS/misc/miscControllers.js"></script>
+    <script type="module" src="../JS/search/searchControllers.js"></script>  
+        <!-- <script src="../JS/fuiWindowsBorders.js"></script> -->
+
+    <script src="../js/layout.js"></script>
+     <!-- <script src="../js/layout-debug.js"></script> -->
+    <script src="../js/mainBase.js"></script>
+  </body>
+</html>
