@@ -7,111 +7,85 @@
   padding: 6px;
 }
 
-/* IDEE n°8362 : faire une div pour bordure de haut, centrer + width:70%, caller svg de chaque côté 
-.fuiWin-top-line {
-  height: 1px;
-  background: var(--text-white);
-  opacity: 0.7;
-  width:50%;
-  align-items: center;
-} */
-/* 
+/* =====================================================
+   WINDOW FRAME (do NOT change layout)
+===================================================== */
 .fui-window {
   position: relative;
-  border-right: 1px solid rgb(25, 0, 255) !important;
-  border-left: 1px solid rgb(25, 0, 255) !important;
-  border-bottom: 1px solid rgb(25, 0, 255) !important;
-  background-color: #ff8c00 !important;
 
-} */
+  /* fixed border width => no layout shift when active */
+  border: 1px solid var(--border-windows) !important;
 
-.fui-window {
-  position: relative;
-  border: 2px solid var(--border-windows) !important;
+  /* keep subtle dark fill, does not affect child grids */
   background-color: var(--color-black) !important;
-  /* background: red; */
+
   overflow: auto;
-  opacity: 0.8;
   padding: 0px !important;
+
+  /* stable opacity */
+  opacity: 0.92;
 }
 
-/* =====================================================
-      essaie avec svg et bordure (pas ouf) 
-===================================================== */
-
-/* .fui-window::before,
-.fui-window::after {
-  content: "";
-  position: absolute;
-  top: -10px;
-  width: 100px;
-  height: 20px;
-  background-repeat: no-repeat;
-  background-size: contain;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.fui-window::before {
-  left: 20px;
-  background-image: url("../assets/SVG/gauche.svg");
-}
-
-.fui-window::after {
-  right: 12px;
-  background-image: url("../assets/SVG/droite.svg");
-}  */
-
-/* =====================================================
-oksour
-===================================================== */
-
+/* Layout edit mode: keep readable but do NOT paint red */
 .layout-edit .fui-window {
-  opacity: 0.6;
-  background: rgb(255, 0, 0);
+  opacity: 0.75;
 }
 
-/* .fui-window::before {
-  content: attr(data-title);
-} */
-
+/* =====================================================
+   ACTIVE (focus) — subtle bloom + dashed outline, no shifting
+===================================================== */
 .fui-window.active {
-  opacity: 0.5;
-  outline: 2px solid #44783c;
+  /* keep same border width */
+  border-color: var(--text-glow2) !important;
+
+  /* dashed outline like film frames */
+  outline: 1px dashed var(--bg-transparent-green);
   outline-offset: -2px;
+
+  /* slight bloom */
+  box-shadow: 0 0 10px rgba(115, 231, 255, 0.18);
 }
 
-/* ===============================
-   WINDOW FOCUS & LOCK STYLES (a refaire) 
-   =============================== */
-
-.fui-window.active {
-  border: 2px solid #ff0000 !important;
-  box-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
-}
-
-/* Supprimer .focused, garder seulement .locked */
+/* =====================================================
+   LOCKED (keyboard control) — stronger but still stable
+===================================================== */
 .fui-window.locked {
-  border: 2px solid var(--text-glow2) !important;
-  box-shadow: 0 0 10px rgba(157, 255, 166, 0.8);
+  border-color: var(--text-glow) !important;
+  outline: 1px dashed var(--text-glow2);
+  outline-offset: -2px;
+  box-shadow: 0 0 14px rgba(183, 243, 255, 0.22);
 }
 
+/* Optional small tag, positioned so it doesn’t push layout */
 .fui-window.locked::before {
   content: "[ACTIVE]";
+  position: absolute;
+  top: 2px;
+  right: 6px;
+
   color: var(--text-glow2);
-  background-color: var(--bg-green);
+  background: var(--bg-green);
+  border: 1px solid var(--color-border-soft);
+
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 1.1;
+
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 50;
 }
 
-/* En mode edit, la fenêtre active a un style différent */
+/* In edit mode: keep a distinct outline but not aggressive */
 body.layout-edit .fui-window.active {
-  outline: 1px solid var(--main-green);
-  outline-offset: -3px;
+  outline: 1px dashed var(--main-green);
+  outline-offset: -2px;
+  box-shadow: none;
 }
 
-/* Optional: dim other windows when one is locked */
+/* Dim other windows when one is locked (no transitions that “lag”) */
 body.window-locked .fui-window:not(.locked) {
-  opacity: 0.6;
-  transition: opacity 0.2s;
+  opacity: 0.7;
 }
 
 body.window-locked .fui-window.locked {
@@ -120,8 +94,8 @@ body.window-locked .fui-window.locked {
 
 /* ===============================
    PUSH MODE INDICATOR
-   =============================== */
-
+   (kept compatible, themed via vars)
+=============================== */
 .push-indicator {
   position: fixed;
   top: 50px;
@@ -129,24 +103,22 @@ body.window-locked .fui-window.locked {
   padding: 6px 12px;
   font-family: monospace;
   font-size: 11px;
-  font-weight: bold;
-  border: 2px solid;
+  border: 1px solid var(--color-border-hard);
   z-index: 10000;
   user-select: none;
   pointer-events: none;
-  transition: all 0.2s ease;
 }
 
 .push-indicator[data-push="on"] {
-  background: #00ff88;
-  border-color: #00ff88;
-  color: #000;
+  background: var(--bg-transparent-green);
+  border-color: var(--text-glow2);
+  color: var(--text-white);
 }
 
 .push-indicator[data-push="off"] {
-  background: #ff6666;
-  border-color: #ff6666;
-  color: #000;
+  background: var(--alert-bg);
+  border-color: var(--alert-border);
+  color: var(--alert-text);
 }
 
 body:not(.layout-edit) .push-indicator {

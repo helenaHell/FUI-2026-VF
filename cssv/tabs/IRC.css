@@ -1,0 +1,325 @@
+/* Divider */
+.is-divider {
+  height: 1px;
+  background: rgba(156, 255, 156, 0.3);
+  margin: 6px 0;
+}
+
+/* ===============================
+   IRC STATS
+=============================== */
+
+#irc-stats {
+  padding: 6px;
+  color: var(--color-white);
+  height: 100%;
+  overflow: hidden;
+}
+
+.irc-system {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+}
+
+.top-stats {
+  display: grid;
+  grid-template-columns: 60% 100%;
+  margin-bottom: 8px;
+  margin-right: 10px;
+}
+
+.bars {
+  display: grid;
+  grid-template-columns: 5ch 1fr;
+  row-gap: 6px;
+  align-items: center;
+}
+
+.bar-container span {
+  display: block;
+  height: 12px;
+  background: var(--color-white);
+}
+
+.info {
+  display: grid;
+  grid-template-columns: max-content max-content 1fr;
+  row-gap: 4px;
+}
+
+.processes {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow-y: auto;
+}
+
+.header-stats,
+.row {
+  display: grid;
+  grid-template-columns: 60px 80px 50px 40px 90px 70px 70px 40px 60px 60px 70px 70px 100px;
+  gap: 8px;
+}
+
+.header-stats {
+  background: var(--bg-green);
+  color: var(--color-black);
+  padding: 2px 4px;
+  position: sticky;
+  top: 0;
+}
+
+.process-list {
+  max-height: 100%;
+  overflow-y: auto;
+  scroll-padding-top: 32px;
+}
+.row.hl {
+  background: var(--dark-green);
+  /* outline: 1px solid rgb(163, 255, 163); */
+}
+.row.hot {
+  background: rgba(255, 255, 255, 0);
+}
+
+/* ===============================
+   Twitter
+=============================== */
+#irc-twitter {
+  padding: 3px 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.header-twitter {
+  background-color: var(--main-green);
+  color: var(--color-white);
+
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+}
+
+.twitter {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.ddd_wiki-fist {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.breaking {
+  color: var(--color-white);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.user-names {
+  color: var(--color-white);
+  display: inline-block;
+  font-size: 13px;
+  font-weight: bold;
+}
+.user-names.highlight1 {
+  background-color: #ff3d3d;
+}
+.user-names.highlight2 {
+  background-color: #3f92ff;
+}
+.user-names.highlight3 {
+  background-color: #ff5e01;
+}
+.user-names.highlight4 {
+  background-color: #ae5dff;
+}
+.user-names.highlight5 {
+  background-color: #ff6b7f;
+}
+.user-names.highlight6 {
+  background-color: #ff82c1;
+}
+.user-names.highlight7 {
+  background-color: #ffeb6b;
+}
+.user-names.highlight8 {
+  background-color: #a953ff;
+}
+.user-names.highlight9 {
+  background-color: #3431fb;
+}
+.user-names.highlight10 {
+  background-color: #ffba82;
+}
+
+.tweet-content {
+  color: var(--color-white);
+  font-size: 12px;
+
+  margin: 2px 0;
+}
+
+.tweet-timestamp {
+  color: var(--main-green);
+  font-size: 11px;
+}
+
+.seperator {
+  border-top: 1px dashed var(--color-white);
+  margin-top: 10px;
+  margin-bottom: 3px;
+}
+
+/* Scrollbar */
+#irc-twitter::-webkit-scrollbar {
+  width: 6px;
+}
+
+#irc-twitter::-webkit-scrollbar-track {
+  background: none;
+  border: 1px solid var(--main-green);
+}
+
+#irc-twitter::-webkit-scrollbar-thumb {
+  background: var(--text-glow);
+}
+
+/* ===============================
+   IRC INTERFACE STATUS
+=============================== */
+
+.interface-status {
+  font-size: clamp(11px, 1.2vw, 13px);
+  color: var(--text-glow);
+  padding: 8px;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Section titles */
+.is-section-title {
+  opacity: 0.85;
+  margin-bottom: 20px;
+}
+
+/* Shared grid logic */
+.is-header,
+.is-row {
+  display: grid;
+  grid-template-columns:
+    minmax(90px, 1.2fr)
+    minmax(60px, 0.7fr)
+    minmax(100px, 1.2fr)
+    minmax(140px, 2fr)
+    minmax(70px, 0.8fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.is-row .state {
+  color: var(--text-glow2);
+}
+
+.is-body {
+  position: absolute;
+  flex-direction: column;
+  top: 15vh;
+  gap: 2px;
+}
+
+/* Footer */
+.is-footer {
+  background-color: var(--color-bg-bars);
+  width: 100%;
+  padding: 4px 0px 4px 0px;
+  color: var(--text-glow2);
+  position: absolute;
+  margin: none;
+  bottom: 0;
+  left: 0;
+}
+
+/* Small screens */
+@media (max-width: 600px) {
+  .is-header,
+  .is-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ===============================
+   IRC CHAT
+=============================== */
+
+.chat-window {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  color: var(--text-glow);
+}
+
+.chat-header {
+  position: absolute;
+  height: 0px;
+  line-height: 10px;
+  padding: 8px 8px;
+  text-align: left;
+}
+
+.chat-msg {
+  position: absolute;
+  top: 40px;
+  left: 10px;
+  width: calc(100% - 20px);
+  height: 200px;
+  overflow: hidden;
+}
+
+.chat-msg-line {
+  margin-bottom: 2px;
+}
+
+.chat-freenode {
+  position: absolute;
+  color: white;
+  bottom: 50px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  border-top: 1px dashed white;
+  border-bottom: 1px dashed white;
+  /* transform: translateY(-50%); */
+  text-align: left;
+  padding: 8px;
+}
+
+/* INPUT : EN BAS FIXE */
+.chat-input {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 40px; /* hauteur fixe */
+  padding-left: 6px;
+}
+.input-prefix {
+  color: white;
+}
+
+.chat-msg-line {
+  white-space: pre-wrap; /* pour voir les caractères spéciaux et espaces */
+  overflow-wrap: break-word;
+}
+
+.cursor {
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}

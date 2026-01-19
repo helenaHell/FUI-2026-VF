@@ -10,7 +10,6 @@ const GRID_ROWS = 2;
 const windowOrder = [
   "main-ops",
   "main-network",
-  "main-comms",
   "main-intel",
 
   "code-1",
@@ -32,11 +31,13 @@ const windowOrder = [
 
   "search-1",
   "search-2",
+  "search-3",
 
   "dev-terminal",
   "dev-logs",
   "dev-editor",
   "dev-1",
+  "dev-2",
 
   "misc-1",
   "misc-2",
@@ -46,10 +47,9 @@ const windowOrder = [
 
 const layouts = {
   "1main": {
-    "main-comms": { col: 1, row: 1, w: 1, h: 1 },
-    "main-network": { col: 2, row: 1, w: 1, h: 1 },
-    "main-intel": { col: 3, row: 1, w: 1, h: 1 },
-    "main-ops": { col: 1, row: 2, w: 2, h: 1 },
+    "main-network": { col: 1, row: 2, w: 2, h: 1 },
+    "main-intel": { col: 3, row: 1, w: 1, h: 2 },
+    "main-ops": { col: 1, row: 1, w: 2, h: 1 },
   },
   "2code": {
     "code-1": { col: 1, row: 1, w: 2, h: 2 },
@@ -68,8 +68,9 @@ const layouts = {
     "irc-InterfaceStatus": { col: 1, row: 1, w: 1, h: 2 },
   },
   "5search": {
-    "search-1": { col: 1, row: 2, w: 1, h: 1 },
-    "search-2": { col: 2, row: 2, w: 1, h: 1 },
+    "search-1": { col: 1, row: 1, w: 1, h: 2 },
+    "search-2": { col: 2, row: 1, w: 1, h: 2 },
+    "search-3": { col: 3, row: 1, w: 1, h: 2 },
   },
 
   "6dev": {
@@ -77,6 +78,7 @@ const layouts = {
     "dev-terminal": { col: 3, row: 1, w: 1, h: 2 },
     "dev-logs": { col: 2, row: 2, w: 1, h: 1 },
     "dev-1": { col: 1, row: 2, w: 1, h: 1 },
+    "dev-2": { col: 3, row: 2, w: 1, h: 1 },
   },
 
   "7misc": {
@@ -84,6 +86,8 @@ const layouts = {
     "misc-2": { col: 2, row: 1, w: 2, h: 1 },
   },
 };
+
+document.getElementById("dev-2");
 
 document.addEventListener(
   "mousedown",

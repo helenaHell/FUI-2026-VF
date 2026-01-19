@@ -1,17 +1,17 @@
 import { startSearch1, stopSearch1 } from "./search1.js";
-// import { startSearch2, stopSearch2 } from "./search2.js";
-import { startSearchFiles, stopSearchFiles } from "./searchFiles.js";
+import { startSearch2, stopSearch2 } from "./search2.js";
+import { startSearch3, stopSearch3 } from "./search3.js";
 
 function startSEARCH() {
   startSearch1();
-  // startSearch2();
-  startSearchFiles();
+  startSearch2();
+  startSearch3();
 }
 
 function stopSEARCH() {
   stopSearch1();
-  // stopSearch2();
-  stopSearchFiles();
+  stopSearch2();
+  stopSearch3();
 }
 
 document.addEventListener("tabChanged", (e) => {

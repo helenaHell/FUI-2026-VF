@@ -2,6 +2,7 @@ import { startDevTerminal, stopDevTerminal } from "./devTerminal.js";
 import { startDevLogs, stopDevLogs } from "./devLogs.js";
 import { startDevEditor, stopDevEditor } from "./devEditor.js";
 import { startDev1, stopDev1 } from "./dev1.js";
+import { startDev2, stopDev2 } from "./dev2.js";
 
 // =====================
 // START/STOP
@@ -14,6 +15,7 @@ function startDEV() {
   startDevLogs();
   startDevEditor();
   startDev1();
+  startDev2();
 }
 
 function stopDEV() {
@@ -23,6 +25,7 @@ function stopDEV() {
   stopDevLogs();
   stopDevEditor();
   stopDev1();
+  stopDev2();
 }
 
 // =====================

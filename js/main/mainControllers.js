@@ -10,14 +10,12 @@ import { startMainNetwork, stopMainNetwork } from "./mainNetwork.js";
 function startMAIN() {
   startMainIntel();
   startMainOps();
-  startMainComms();
   startMainNetwork();
 }
 
 function stopMAIN() {
   stopMainIntel();
   stopMainOps();
-  stopMainComms();
   stopMainNetwork();
 }
 

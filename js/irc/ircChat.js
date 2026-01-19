@@ -2,7 +2,7 @@ import { createFUIWindow } from "../core/template.js";
 import { isWindowActive } from "../core/utils.js";
 
 /* =====================
-   TAGS
+   DATA
 ===================== */
 
 const messages = [
@@ -67,14 +67,20 @@ const state = {
 };
 
 let currentMessageIndex = 0;
+let chatDirty = false;
+
+/* =====================
+   HELPERS
+===================== */
 
 function generateFreenodeData() {
-  const lag = (Math.random() * 0.998 + 0.001).toFixed(3); // 0.001 → 0.999
-  const active = Math.floor(Math.random() * 30 + 1); // 1 → 30
+  const lag = (Math.random() * 0.998 + 0.001).toFixed(3);
+  const active = Math.floor(Math.random() * 30 + 1);
   return { lag, active };
 }
 
 function updateMessages() {
+  // Si l'utilisateur a tapé, on force un rendu rapide
   if (chatDirty) {
     chatDirty = false;
     ircChatWindow.forceRender();
@@ -86,28 +92,65 @@ function updateMessages() {
   if (state.lines.length > 8) state.lines.shift();
 }
 
-let chatDirty = false;
+/* =====================
+   KEYBOARD (FIXED)
+   - listener ajouté uniquement quand la window tourne
+   - n'intercepte PAS le clavier hors de la window
+   - preventDefault seulement si on consomme la touche
+===================== */
 
-document.addEventListener("keydown", (e) => {
-  if (!isWindowActive("irc-chat")) return;
+let cleanupKeyboard = null;
 
-  e.preventDefault();
+function setupKeyboard() {
+  if (cleanupKeyboard) cleanupKeyboard();
 
-  if (e.key === "Backspace") {
-    state.input = state.input.slice(0, -1);
-    chatDirty = true;
-  } else if (e.key === "Enter") {
-    if (state.input.trim() !== "") {
-      state.lines.push(`mArc> ${state.input}`);
-      if (state.lines.length > 8) state.lines.shift();
-      state.input = "";
+  const onKeyDown = (e) => {
+    // Clavier seulement si la window est active
+    if (!isWindowActive("irc-chat")) return;
+
+    // Ne pas casser les raccourcis système / combos
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    // On ne bloque que les touches qu'on consomme
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      state.input = state.input.slice(0, -1);
       chatDirty = true;
+      ircChatWindow.forceRender();
+      return;
     }
-  } else if (e.key.length === 1) {
-    state.input += e.key;
-    chatDirty = true;
-  }
-});
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const text = state.input.trim();
+      if (text !== "") {
+        state.lines.push(`mArc> ${text}`);
+        if (state.lines.length > 8) state.lines.shift();
+        state.input = "";
+        chatDirty = true;
+        ircChatWindow.forceRender();
+      }
+      return;
+    }
+
+    // caractères
+    if (typeof e.key === "string" && e.key.length === 1) {
+      // Optionnel: limite de longueur pour éviter perfs / overflow
+      if (state.input.length >= 120) return;
+
+      e.preventDefault();
+      state.input += e.key;
+      chatDirty = true;
+      ircChatWindow.forceRender();
+    }
+  };
+
+  document.addEventListener("keydown", onKeyDown, false);
+
+  cleanupKeyboard = () => {
+    document.removeEventListener("keydown", onKeyDown, false);
+  };
+}
 
 /* =====================
    RENDER
@@ -118,27 +161,20 @@ function render() {
   return `
     <div class="chat-window">
       <div class="chat-header">#wikichat ircs://chat.wikileaks.org/</div>
-    
-    <div class="chat-msg">
-  ${state.lines
-    .map((msg) => `<div class="chat-msg-line">${msg}</div>`)
-    .join("")}
-</div>
+
+      <div class="chat-msg">
+        ${state.lines.map((msg) => `<div class="chat-msg-line">${msg}</div>`).join("")}
       </div>
 
-      <div class="chat-freenode" >
-        <span class="chat-freenode-l1" > [42] [irc/freenode] 13:#Wikichat.(+cnt)</span>
-        <br>
-        <span class="chat-freenode-l2" > [Lag: ${lag}] [Active: ${active}] [mig5(+Xi)]</span>
+      <div class="chat-freenode">
+        <span class="chat-freenode-l1"> [42] [irc/freenode] 13:#Wikichat.(+cnt)</span><br>
+        <span class="chat-freenode-l2"> [Lag: ${lag}] [Active: ${active}] [mig5(+Xi)]</span>
       </div>
 
-
-
-      <div class="chat-input"><span class="input-prefix">&lt;mArc(i)&gt;</span> ${
-        state.input
-      }<span class="cursor">█</span></div>
-
-    
+      <div class="chat-input">
+        <span class="input-prefix">&lt;mArc(i)&gt;</span> ${state.input}<span class="cursor">█</span>
+      </div>
+    </div>
   `;
 }
 
@@ -149,13 +185,16 @@ export const ircChatWindow = createFUIWindow({
   id: "irc-chat",
   render,
   update: updateMessages,
-  interval: { min: 1000, max: 4000 },
+  interval: { min: 900, max: 3000 },
 });
 
 export function startIRCChat() {
   ircChatWindow.start();
+  setupKeyboard(); // ✅ attach seulement ici
 }
 
 export function stopIRCChat() {
   ircChatWindow.stop();
+  if (cleanupKeyboard) cleanupKeyboard(); // ✅ detach ici
+  cleanupKeyboard = null;
 }

@@ -1,91 +1,79 @@
 /* =====================================================
    ROOT COLORS — SINGLE SOURCE OF TRUTH
+   BLUE FIFTH ESTATE THEME (safe override)
 ===================================================== */
 
 :root {
-  /* Base Colors */
-  --color-black: #000000a8;
+  /* Base */
   --color-white: #ffffff;
-  --color-bg-main: #000f0a;
+  --color-black: rgba(0, 0, 0, 0.82);
 
-  /* Green Palette */
-  --green-primary: #00ff88;
-  --green-secondary: #0eac43;
-  --green-bright: #9cff9c;
-  --green-glow: #6aff6a;
-  --green-dark: #075430;
-  --green-dim: #1c7a5a;
-  --green-muted: #0e4f39;
-  --green-highlight: #00d3279f;
-  --green-transparent: #00ff8840;
+  /* Backgrounds (deep navy) */
+  --color-bg-main: #050b1b;
+  --color-bg-bars: #050b1b;
 
-  /* Text Colors */
-  --text-primary: #00ff88;
-  --text-white: #eafff6;
-  --text-dim: #1c7a5a;
-  --text-muted: #0e4f39;
-  --text-glow: #9cff9c;
-  --text-glow-bright: #6aff6a;
+  /* Electric Blue Palette (mapped into existing green var names) */
+  --green-primary: #38d7ff; /* main cyan */
+  --green-secondary: #1aa8ff; /* secondary cyan/blue */
+  --green-bright: #b7f3ff; /* bright text glow */
+  --green-glow: #73e7ff; /* glow */
+  --green-dark: #071128; /* dark panel */
+  --green-dim: #1b4e6b; /* dim text */
+  --green-muted: #103a52; /* muted text */
+  --green-highlight: rgba(56, 215, 255, 0.22);
+  --green-transparent: rgba(56, 215, 255, 0.18);
 
-  /* Background Colors */
+  /* Text (keep aliases used everywhere) */
+  --text-primary: #38d7ff;
+  --text-white: #eaf6ff;
+  --text-dim: #87bdd3;
+  --text-muted: #5f93aa;
+  --text-glow: #b7f3ff;
+  --text-glow-bright: #73e7ff;
+
+  /* Background aliases */
   --bg-black: var(--color-black);
-  --bg-bars: var(--color-bg-main);
-  --bg-green: #075430;
-  --bg-green-transparent: #00ff8840;
-  --bg-Dgreen: var(--green-dark);
+  --bg-bars: var(--color-bg-bars);
+  --bg-green: rgba(10, 24, 58, 0.85); /* used as highlight background */
+  --bg-green-transparent: rgba(56, 215, 255, 0.18);
+  --bg-Dgreen: rgba(7, 17, 40, 0.95);
 
-  /* Border Colors */
-  --border-soft: rgba(0, 255, 136, 0.15);
-  --border-medium: rgba(0, 255, 136, 0.3);
-  --border-hard: rgba(0, 255, 136, 0.5);
+  /* Borders */
+  --border-soft: rgb(4, 30, 60);
+  --border-medium: rgb(196, 218, 255);
+  --border-hard: rgb(255, 255, 255);
 
-  /* State Colors */
-  --tab-active-bg: #00d3279f;
-  --main-green: #0eac43;
+  /* State colors (tabs / stats) */
+  --tab-active-bg: rgb(10, 16, 41);
+  --main-green: #7ccbff; /* keep name for compatibility */
 
-  /* Legacy Aliases (for backward compatibility) */
+  /* Backward compatibility aliases (do not remove) */
   --color-text-main: var(--text-primary);
+  --color-text-dim: var(--text-dim);
+  --color-text-muted: var(--text-muted);
+  --color-text-white: var(--text-white);
+
   --color-border-soft: var(--border-soft);
   --color-border-hard: var(--border-medium);
 
-  /*___________________________________
-  --color-bg-absolute: #ff0606;
-  --color-bg-main: #00ffa2;
-  ___________________________________*/
+  /* Window frame color */
+  --border-windows: rgb(179, 211, 220);
 
-  --color-bg-bars: #000f0a; /* bg-tab // Text-under-hightlight */
+  /* Highlights */
+  --bg-transparent-green: rgba(76, 194, 214, 0.743);
+  --bg-green2: rgb(17, 34, 80);
+  --dark-green: rgb(43, 66, 106);
 
-  --color-text-dim: #1c7a5a;
-  --color-text-muted: #0e4f39;
-  --color-text-white: #eafff6;
+  /* Main text (keep name) */
+  --text-bright: rgb(102, 230, 255);
 
-  --color-border-soft: rgba(0, 255, 136, 0.15);
-  --color-border-hard: rgba(0, 255, 136, 0.3);
+  /* Glow (keep names used by tabs) */
+  --text-glow2: #ade4ff;
 
-  --border-windows: rgb(159, 173, 157);
-
-  /* COLROS */
-  --color-white: #ffffff;
-  --color-black: #000000;
-
-  --tab-active-bg: #00d3279f; /* highlighted bg tab + bg performance stats */
-  --main-green: #10963c; /* text button tab (without higlight) + text secondary bar */
-
-  /* HIGHLIGHT */
-  --bg-transparent-green: #00ff8840;
-  --bg-green: #0d4623; /* hl IRCstats / hl headerDISTadresse */
-
-  --dark-green: #09300f;
-  --bg-green2: #348b3a;
-
-  --color-text-main: #00ff40; /* !!Bien aussi pour main text  */
-  --text-bright: #00ff00b3;
-
-  /* GLOW */
-  --text-glow: #9cff9c;
-  --text-glow2: #6aff6a;
-
-  /* IRC :/ glow / main-green / bg- green / dark green */
+  /* NEW: Alerts (pink/red like the movie) */
+  --alert-text: #ff5aa8; /* pinkish red text */
+  --alert-bg: rgba(255, 90, 168, 0.28); /* highlight background */
+  --alert-border: rgba(255, 90, 168, 0.6);
 }
 
 /* =====================================================
@@ -106,6 +94,7 @@ body {
   overflow: hidden;
 }
 
+/* Background */
 #background {
   position: fixed;
   top: 0;
@@ -113,25 +102,13 @@ body {
   width: 100vw;
   height: 100vh;
 
-  background-image: url("../assets/bg-CC.png");
-  background-color: var(--color-bg-bars);
+  /* keep existing behavior, but now it reads blue because vars changed */
+  background-color: rgb(1, 20, 58);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   z-index: -1;
 }
-
-/* .bottom-bar {
-  position: absolute;
-  bottom: 0;  
-  left: 0;
-  right: 0;
-}
-.fb-footer-row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 8px;
-} */
 
 /* =====================================================
    TOP BAR — TABS + STATS
@@ -139,7 +116,6 @@ body {
 #top-bar {
   height: 23px;
   background: var(--color-black);
-  /* opacity: 0.96; */
   display: flex;
   justify-content: space-between;
   align-items: stretch;
@@ -187,19 +163,18 @@ body {
   color: var(--color-text-main);
 }
 
-/* ACTIVE TAB — movie accurate */
+/* ACTIVE TAB */
 #tabs button.active {
   background: var(--main-green);
 }
 
 #tabs button.active .tab-number,
 #tabs button.active .tab-label {
-  color: var(--text-glow2);
+  color: var(--color-bg-bars);
 }
 
 #tabs button.active .tab-icon {
   background: var(--color-text-white);
-  /* border-color: var(--color-text-white); */
 }
 
 /* ---------------- PERFORMANCE STATS ---------------- */
@@ -209,7 +184,6 @@ body {
   align-items: center;
   gap: 12px;
   padding: 0 10px;
-  /* color: var(--color-text-dim); */
   color: var(--text-glow2);
 }
 
@@ -224,77 +198,65 @@ body {
 }
 
 /* =====================================================
-   SECONDARY BAR — SESSION / STATUS
+   BLOOM (subtle)
+   - applies to common “glow” text but doesn’t change layout
 ===================================================== */
-#secondary-bar {
-  background: transparent;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  padding-left: 8px;
-  padding-top: 10px;
-}
-
-.status-label {
-  color: var(--text-glow);
+.glow,
+.text-glow,
+.fui-header-title,
+.fui-title,
+.tab-label,
+.tab-number {
+  text-shadow: 0 0 6px rgba(115, 231, 255, 0.28);
 }
 
 /* =====================================================
-   FOOTER BAR (ALWAYS VISIBLE)
+   ALERTS / BLINK (pink/red highlight on words)
+   - Safe: only affects elements that already use these classes,
+     otherwise it does nothing.
 ===================================================== */
-#footer-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--color-black);
-  opacity: 0.8;
-  padding: 6px 12px;
-  z-index: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+
+@keyframes fuiAlertBlink {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
-.footer-tip {
-  color: var(--tab-active-bg);
-  padding-top: 1px;
+/* generic “word highlight” */
+.fui-alert,
+.alert,
+.warning,
+.error,
+.err,
+.warn {
+  color: var(--alert-text);
+  background: var(--alert-bg);
+  padding: 0 3px;
+  border: 1px solid var(--alert-border);
 }
 
-.footer-function-keys {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 5px;
-  border-top: 1px solid var(--tab-active-bg);
-  /* gap: 5px; */
+/* blinking variant */
+.fui-alert.blink,
+.alert.blink,
+.warning.blink,
+.error.blink,
+.err.blink,
+.warn.blink {
+  animation: fuiAlertBlink 0.75s steps(1, end) infinite;
 }
 
-.fkey-num {
-  color: var(--text-glow2);
-}
-
-.fkey-label {
-  background-color: var(--tab-active-bg);
-  color: var(--color-white);
-  padding: 2px 0px;
-}
-
-#push-indicator {
-  position: fixed;
-  bottom: 12px;
-  right: 12px;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-family: monospace;
-  background: #111;
-  color: #777;
-  border: 1px solid #333;
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-body.push-on #push-indicator {
-  color: #0f0;
-  border-color: #0f0;
-  opacity: 1;
+/* keep it tight in dense tables */
+.fui-alert,
+.alert,
+.warning,
+.error,
+.err,
+.warn {
+  line-height: 1.1;
 }

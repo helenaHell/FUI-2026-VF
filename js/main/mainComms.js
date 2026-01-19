@@ -1,330 +1,326 @@
 import { createFUIWindow } from "../core/template.js";
-import {
-  setupKeyboardHandler,
-  setupClickHandler,
-  formatTime,
-} from "../core/utils.js";
+import { setupKeyboardHandler, setupClickHandler } from "../core/utils.js";
 
-// =====================
-// DATA
-// =====================
-
-const CHANNELS = [
-  {
-    id: "CH-01",
-    name: "ALPHA",
-    freq: "148.250",
-    status: "ACTIVE",
-    signal: 94,
-    traffic: "HIGH",
-    encrypted: true,
+const FILE_SYSTEM = {
+  "": {
+    size: "Up-Dir",
+    modify: "",
+    children: {},
   },
-  {
-    id: "CH-02",
-    name: "BRAVO",
-    freq: "162.175",
-    status: "IDLE",
-    signal: 67,
-    traffic: "LOW",
-    encrypted: true,
+  archive: {
+    size: 24576,
+    modify: "16:43",
+    children: {
+      2019: {
+        size: 12288,
+        modify: "14:22",
+        children: {
+          jan: { size: 2048, modify: "09:12", children: {} },
+          feb: { size: 3072, modify: "10:44", children: {} },
+        },
+      },
+      2020: {
+        size: 18432,
+        modify: "15:11",
+        children: {
+          mar: { size: 4096, modify: "11:03", children: {} },
+          apr: { size: 5120, modify: "12:50", children: {} },
+        },
+      },
+    },
   },
-  {
-    id: "CH-03",
-    name: "CHARLIE",
-    freq: "156.800",
-    status: "ACTIVE",
-    signal: 88,
-    traffic: "MED",
-    encrypted: false,
+  assets: {
+    size: 4096,
+    modify: "14:23",
+    children: {
+      images: {
+        size: 2048,
+        modify: "11:22",
+        children: {
+          ui: { size: 512, modify: "09:21", children: {} },
+          icons: { size: 384, modify: "08:55", children: {} },
+        },
+      },
+      videos: {
+        size: 8192,
+        modify: "16:44",
+        children: {
+          promo: { size: 4096, modify: "13:11", children: {} },
+          raw: { size: 12288, modify: "18:01", children: {} },
+        },
+      },
+    },
   },
-  {
-    id: "CH-04",
-    name: "DELTA",
-    freq: "164.425",
-    status: "JAMMED",
-    signal: 23,
-    traffic: "NONE",
-    encrypted: true,
+  boot: {
+    size: 28488,
+    modify: "13:52",
+    children: {
+      grub: {
+        size: 512,
+        modify: "10:11",
+        children: {
+          cfg: { size: 128, modify: "10:10", children: {} },
+        },
+      },
+      initrd: {
+        size: 24576,
+        modify: "13:52",
+        children: {},
+      },
+    },
   },
-  {
-    id: "CH-05",
-    name: "ECHO",
-    freq: "151.625",
-    status: "ACTIVE",
-    signal: 91,
-    traffic: "HIGH",
-    encrypted: true,
+  "cgi-ssh": {
+    size: 1582,
+    modify: "02:21",
+    children: {
+      bin: {
+        size: 256,
+        modify: "02:20",
+        children: {
+          connect: { size: 64, modify: "02:18", children: {} },
+        },
+      },
+      config: {
+        size: 1024,
+        modify: "02:21",
+        children: {},
+      },
+    },
   },
-  {
-    id: "CH-06",
-    name: "FOXTROT",
-    freq: "159.350",
-    status: "IDLE",
-    signal: 72,
-    traffic: "LOW",
-    encrypted: false,
+  database: {
+    size: 3423,
+    modify: "12:48",
+    children: {
+      users: {
+        size: 890,
+        modify: "15:32",
+        children: {
+          index: { size: 256, modify: "15:30", children: {} },
+        },
+      },
+      logs: {
+        size: 2048,
+        modify: "18:22",
+        children: {
+          error: { size: 512, modify: "18:20", children: {} },
+          access: { size: 768, modify: "18:21", children: {} },
+        },
+      },
+    },
   },
-  {
-    id: "CH-07",
-    name: "GOLF",
-    freq: "163.275",
-    status: "ACTIVE",
-    signal: 85,
-    traffic: "MED",
-    encrypted: true,
+  "disk-util": {
+    size: 4098,
+    modify: "19:21",
+    children: {
+      fsck: {
+        size: 2048,
+        modify: "19:21",
+        children: {},
+      },
+      mount: {
+        size: 1024,
+        modify: "19:20",
+        children: {},
+      },
+    },
   },
-  {
-    id: "CH-08",
-    name: "HOTEL",
-    freq: "157.450",
-    status: "SCANNING",
-    signal: 0,
-    traffic: "VAR",
-    encrypted: true,
+  info: {
+    size: 1823,
+    modify: "11:03",
+    children: {
+      readme: { size: 512, modify: "11:03", children: {} },
+      license: { size: 1024, modify: "11:02", children: {} },
+    },
   },
-];
-
-const MESSAGE_TEMPLATES = [
-  { from: "ALPHA", type: "SECURE", text: "Package en route - ETA 20 minutes" },
-  {
-    from: "BRAVO",
-    type: "ALERT",
-    text: "Surveillance detected - recommend diversion",
+  ntpppd: {
+    size: 2356,
+    modify: "21:13",
+    children: {
+      conf: { size: 256, modify: "21:13", children: {} },
+      drift: { size: 128, modify: "21:10", children: {} },
+    },
   },
-  {
-    from: "CHARLIE",
-    type: "ROUTINE",
-    text: "Position update - coordinates transmitted",
+  security: {
+    size: 7,
+    modify: "10:08",
+    children: {
+      keys: {
+        size: 512,
+        modify: "10:08",
+        children: {
+          rsa: { size: 128, modify: "10:07", children: {} },
+        },
+      },
+      certs: {
+        size: 1024,
+        modify: "10:07",
+        children: {},
+      },
+    },
   },
-  {
-    from: "DELTA",
-    type: "URGENT",
-    text: "Communications compromised - switching protocol",
+  software_updt: {
+    size: 32750,
+    modify: "00:02",
+    children: {
+      patches: {
+        size: 16384,
+        modify: "00:02",
+        children: {
+          core: { size: 4096, modify: "00:01", children: {} },
+        },
+      },
+      updates: {
+        size: 8192,
+        modify: "23:55",
+        children: {},
+      },
+    },
   },
-  {
-    from: "ECHO",
-    type: "SECURE",
-    text: "Extraction point confirmed - standby for signal",
+  startup: {
+    size: 50,
+    modify: "07:34",
+    children: {
+      "init.d": {
+        size: 256,
+        modify: "07:34",
+        children: {
+          net: { size: 64, modify: "07:30", children: {} },
+        },
+      },
+    },
   },
-  {
-    from: "FOXTROT",
-    type: "ROUTINE",
-    text: "Status nominal - continuing mission parameters",
+  track_ip: {
+    size: 1982,
+    modify: "04:23",
+    children: {
+      logs: {
+        size: 4096,
+        modify: "04:23",
+        children: {
+          today: { size: 512, modify: "04:21", children: {} },
+          yesterday: { size: 768, modify: "03:58", children: {} },
+        },
+      },
+    },
   },
-  {
-    from: "GOLF",
-    type: "ALERT",
-    text: "Anomaly detected in sector 7 - investigating",
-  },
-  {
-    from: "HOTEL",
-    type: "URGENT",
-    text: "Contact lost with asset - initiating search",
-  },
-];
-
-// =====================
-// STATE
-// =====================
-
-const state = {
-  selectedChannel: 0,
-  messages: [],
-  filterType: "ALL",
-  interceptMode: false,
 };
 
-// =====================
-// HELPERS
-// =====================
+const state = {
+  openFolders: new Set(),
+  selectedIndex: 0,
+  flatList: [],
+};
 
-function getStatusColor(status) {
-  switch (status) {
-    case "ACTIVE":
-      return "var(--color-text-main)";
-    case "JAMMED":
-      return "#ff4444";
-    case "SCANNING":
-      return "#ffaa00";
-    default:
-      return "var(--text-glow)";
-  }
+function buildFlatList(tree, depth = 0, list = []) {
+  Object.entries(tree).forEach(([name, data]) => {
+    list.push({ name, data, depth });
+    if (state.openFolders.has(name)) {
+      buildFlatList(data.children, depth + 1, list);
+    }
+  });
+  return list;
 }
 
-function getTypeColor(type) {
-  switch (type) {
-    case "URGENT":
-      return "#ff4444";
-    case "ALERT":
-      return "#ffaa00";
-    case "SECURE":
-      return "var(--color-text-main)";
-    default:
-      return "var(--text-glow)";
-  }
-}
-
-function getFilteredMessages() {
-  if (state.filterType === "ALL") return state.messages;
-  return state.messages.filter((m) => m.type === state.filterType);
-}
-
-// =====================
-// RENDER
-// =====================
-
-function render() {
-  const selected = CHANNELS[state.selectedChannel];
-  const filtered = getFilteredMessages();
+function renderRow(name, data, depth, index) {
+  const hasChildren = Object.keys(data.children).length > 0;
+  const isOpen = state.openFolders.has(name);
+  const icon = hasChildren ? (isOpen ? "/ ▼" : "/.") : "/..";
+  const indent = depth * 16;
+  const isSelected = index === state.selectedIndex;
 
   return `
-    <div class="comms-container">
-      <div class="comms-header">
-        <span class="comms-title">COMMUNICATIONS</span>
-        <span class="comms-filters">
-          <span class="filter-item ${state.filterType === "ALL" ? "active" : ""}" data-type="ALL">ALL</span>
-          <span class="filter-item ${state.filterType === "URGENT" ? "active" : ""}" data-type="URGENT">URG</span>
-          <span class="filter-item ${state.filterType === "ALERT" ? "active" : ""}" data-type="ALERT">ALT</span>
-          <span class="filter-item ${state.filterType === "SECURE" ? "active" : ""}" data-type="SECURE">SEC</span>
-        </span>
-        <span class="comms-mode ${state.interceptMode ? "active" : ""}" data-toggle="intercept">
-          [${state.interceptMode ? "INTERCEPT:ON" : "INTERCEPT:OFF"}]
-        </span>
-        <span class="comms-time">${formatTime()}</span>
+    <div class="fb-row ${isSelected ? "selected" : ""}" data-folder="${name}" data-index="${index}">
+      <span class="fb-n"></span>
+      <span class="fb-name" style="padding-left:${6 + indent}px">${icon} ${name}</span>
+      <span class="fb-size">${data.size}</span>
+      <span class="fb-modify">${data.modify}</span>
+    </div>
+  `;
+}
+
+function render() {
+  state.flatList = buildFlatList(FILE_SYSTEM);
+
+  const rows = state.flatList
+    .map((item, index) => renderRow(item.name, item.data, item.depth, index))
+    .join("");
+
+  return `
+    <div class="files-container">
+      <div class="fb-header">
+        <span class="fb-h-n">^n</span>
+        <span class="fb-h-name">Name</span>
+        <span class="fb-h-size">Size</span>
+        <span class="fb-h-modify">Modify</span>
       </div>
-
-      <div class="comms-body">
-        <div class="comms-left">
-          <div class="channel-list-header">
-            <span>CH</span>
-            <span>NAME</span>
-            <span>FREQ</span>
-            <span>STATUS</span>
-            <span>SIG</span>
-            <span>TRF</span>
-          </div>
-          <div class="channel-list">
-            ${CHANNELS.map(
-              (ch, i) => `
-              <div class="channel-row ${i === state.selectedChannel ? "selected" : ""}" data-index="${i}">
-                <span class="ch-id">${ch.id}</span>
-                <span class="ch-name">${ch.name}</span>
-                <span class="ch-freq">${ch.freq}</span>
-                <span class="ch-status" style="color: ${getStatusColor(ch.status)}">${ch.status}</span>
-                <span class="ch-signal">
-                  <span class="ch-bar" style="width: ${ch.signal}%"></span>
-                  <span class="ch-val">${ch.signal}</span>
-                </span>
-                <span class="ch-traffic">${ch.traffic}</span>
-                <span class="ch-lock">${ch.encrypted ? "🔒" : ""}</span>
-              </div>
-            `,
-            ).join("")}
-          </div>
+      <div class="fb-body">
+        <div class="fb-body-separators">
+          <span></span>
+          <span></span>
+          <span class="fb-sep-line"></span>
+          <span class="fb-sep-line"></span>
         </div>
-
-        <div class="comms-right">
-          <div class="comms-detail">
-            <div class="detail-section">
-              <div class="detail-row">
-                <span class="detail-label">CHANNEL:</span>
-                <span class="detail-value">${selected.id} - ${selected.name}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">FREQUENCY:</span>
-                <span class="detail-value">${selected.freq} MHz</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">STATUS:</span>
-                <span class="detail-value" style="color: ${getStatusColor(selected.status)}">${selected.status}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">SIGNAL:</span>
-                <span class="detail-value">${selected.signal}%</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">TRAFFIC:</span>
-                <span class="detail-value">${selected.traffic}</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">ENCRYPTION:</span>
-                <span class="detail-value">${selected.encrypted ? "ENABLED" : "NONE"}</span>
-              </div>
-            </div>
-
-            <div class="detail-section">
-              <div class="detail-section-title">MESSAGES (${filtered.length}):</div>
-              <div class="comms-messages">
-                ${
-                  filtered
-                    .slice(-8)
-                    .reverse()
-                    .map(
-                      (msg) => `
-                  <div class="message-item">
-                    <div class="message-header">
-                      <span class="msg-time">${msg.time}</span>
-                      <span class="msg-from">${msg.from}</span>
-                      <span class="msg-type" style="color: ${getTypeColor(msg.type)}">[${msg.type}]</span>
-                    </div>
-                    <div class="message-text">${msg.text}</div>
-                  </div>
-                `,
-                    )
-                    .join("") || '<div class="comms-empty">No messages</div>'
-                }
-              </div>
-            </div>
-
-            <div class="detail-actions">
-              <span class="action-hint">[ENTER] Send  [I] Intercept  [F] Filter  [↑↓] Navigate  [C] Clear</span>
-            </div>
-          </div>
-        </div>
+        ${rows}
       </div>
-
-      <div class="comms-footer">
-        <span>CHANNELS: ${CHANNELS.length}</span>
-        <span>ACTIVE: ${CHANNELS.filter((c) => c.status === "ACTIVE").length}</span>
-        <span>MESSAGES: ${state.messages.length}</span>
-        <span>AVG_SIGNAL: ${Math.round(CHANNELS.reduce((sum, c) => sum + c.signal, 0) / CHANNELS.length)}%</span>
+      <div class="fb-footer">
+        <div class="fb-line"></div>
+        <div class="fb-footer-row">
+          <span>Up -- Dir</span>
+        </div>
+        <div class="fb-line-data">
+          <span class="fb-line short"></span>
+          <span>12.5/60GB (20I)</span>
+        </div>
       </div>
     </div>
   `;
 }
 
-// =====================
-// UPDATE
-// =====================
+function scrollToSelected() {
+  const body = document.querySelector("#main-comms .fb-body");
+  const selectedRow = document.querySelector("#main-comms .fb-row.selected");
 
-function update() {
-  if (Math.random() > 0.6 || state.interceptMode) {
-    const template =
-      MESSAGE_TEMPLATES[Math.floor(Math.random() * MESSAGE_TEMPLATES.length)];
+  if (body && selectedRow) {
+    const bodyRect = body.getBoundingClientRect();
+    const rowRect = selectedRow.getBoundingClientRect();
 
-    state.messages.push({
-      time: formatTime(),
-      from: template.from,
-      type: template.type,
-      text: template.text,
-    });
-
-    if (state.messages.length > 50) state.messages.shift();
-  }
-
-  CHANNELS.forEach((ch) => {
-    if (ch.status === "ACTIVE" && Math.random() > 0.8) {
-      ch.signal = Math.max(
-        60,
-        Math.min(100, ch.signal + (Math.random() - 0.5) * 10),
-      );
+    if (rowRect.top < bodyRect.top) {
+      selectedRow.scrollIntoView({ block: "start", behavior: "smooth" });
+    } else if (rowRect.bottom > bodyRect.bottom) {
+      selectedRow.scrollIntoView({ block: "end", behavior: "smooth" });
     }
-  });
+  }
 }
 
-// =====================
-// INTERACTIONS
-// =====================
+function handleToggle() {
+  const selected = state.flatList[state.selectedIndex];
+  if (!selected) return;
+
+  const name = selected.name;
+  const hasChildren = Object.keys(selected.data.children).length > 0;
+
+  if (hasChildren) {
+    if (state.openFolders.has(name)) {
+      state.openFolders.delete(name);
+    } else {
+      state.openFolders.add(name);
+    }
+    filesWindow.forceRender();
+  }
+}
+
+function handleNavigateUp() {
+  state.selectedIndex = Math.max(state.selectedIndex - 1, 0);
+  filesWindow.forceRender();
+  scrollToSelected();
+}
+
+function handleNavigateDown() {
+  const maxIndex = state.flatList.length - 1;
+  state.selectedIndex = Math.min(state.selectedIndex + 1, maxIndex);
+  filesWindow.forceRender();
+  scrollToSelected();
+}
 
 let cleanupKeyboard = null;
 let cleanupClick = null;
@@ -334,101 +330,49 @@ function setupInteractions() {
   if (cleanupClick) cleanupClick();
 
   cleanupKeyboard = setupKeyboardHandler("main-comms", {
-    ArrowUp: () => {
-      state.selectedChannel = Math.max(0, state.selectedChannel - 1);
-      mainCommsWindow.forceRender();
-    },
-    ArrowDown: () => {
-      state.selectedChannel = Math.min(
-        CHANNELS.length - 1,
-        state.selectedChannel + 1,
-      );
-      mainCommsWindow.forceRender();
-    },
-    Enter: () => {
-      const template =
-        MESSAGE_TEMPLATES[Math.floor(Math.random() * MESSAGE_TEMPLATES.length)];
-      const selected = CHANNELS[state.selectedChannel];
-
-      state.messages.push({
-        time: formatTime(),
-        from: selected.name,
-        type: "SECURE",
-        text: template.text,
-      });
-
-      mainCommsWindow.forceRender();
-    },
-    KeyI: () => {
-      state.interceptMode = !state.interceptMode;
-      mainCommsWindow.forceRender();
-    },
-    KeyF: () => {
-      const types = ["ALL", "URGENT", "ALERT", "SECURE", "ROUTINE"];
-      const current = types.indexOf(state.filterType);
-      state.filterType = types[(current + 1) % types.length];
-      mainCommsWindow.forceRender();
-    },
-    KeyC: () => {
-      state.messages = [];
-      mainCommsWindow.forceRender();
-    },
+    ArrowDown: handleNavigateDown,
+    ArrowUp: handleNavigateUp,
+    Enter: handleToggle,
   });
 
-  cleanupClick = setupClickHandler(
-    "main-comms",
-    ".channel-row",
-    (e, target) => {
-      state.selectedChannel = parseInt(target.dataset.index);
-      mainCommsWindow.forceRender();
-    },
-  );
+  cleanupClick = setupClickHandler("main-comms", ".fb-row", (e, target) => {
+    const index = parseInt(target.dataset.index);
+    const name = target.dataset.folder;
 
-  const filterClick = setupClickHandler(
-    "main-comms",
-    ".filter-item",
-    (e, target) => {
-      state.filterType = target.dataset.type;
-      mainCommsWindow.forceRender();
-    },
-  );
+    state.selectedIndex = index;
 
-  const modeClick = setupClickHandler(
-    "main-comms",
-    "[data-toggle='intercept']",
-    () => {
-      state.interceptMode = !state.interceptMode;
-      mainCommsWindow.forceRender();
-    },
-  );
+    if (name) {
+      const selected = state.flatList[index];
+      const hasChildren = Object.keys(selected.data.children).length > 0;
 
-  const oldCleanupClick = cleanupClick;
-  cleanupClick = () => {
-    oldCleanupClick();
-    filterClick();
-    modeClick();
-  };
+      if (hasChildren) {
+        if (state.openFolders.has(name)) {
+          state.openFolders.delete(name);
+        } else {
+          state.openFolders.add(name);
+        }
+      }
+    }
+
+    filesWindow.forceRender();
+  });
 }
 
-// =====================
-// WINDOW
-// =====================
-
-const mainCommsWindow = createFUIWindow({
+const filesWindow = createFUIWindow({
   id: "main-comms",
   render,
-  update,
-  interval: { min: 1500, max: 4000 },
+  update: null,
+  interval: null,
   defaultMode: "default",
 });
 
 export function startMainComms() {
-  mainCommsWindow.start();
+  filesWindow.start();
   setTimeout(setupInteractions, 100);
 }
 
 export function stopMainComms() {
-  mainCommsWindow.stop();
+  filesWindow.stop();
   if (cleanupKeyboard) cleanupKeyboard();
   if (cleanupClick) cleanupClick();
 }

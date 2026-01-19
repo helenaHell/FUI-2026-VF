@@ -1,551 +1,512 @@
-// import { createFUIWindow } from "../core/template.js";
+import { createFUIWindow } from "../core/template.js";
+import {
+  setupKeyboardHandler,
+  setupClickHandler,
+  isWindowActive,
+} from "../core/utils.js";
 
-// // ============================================
-// // MISC-2: LOG VIEWER + ERROR STACK TRACES
-// // ============================================
+const state = {
+  results: [],
+  selected: 0,
+  flaggedOnly: false,
+  pinned: new Set(),
+  sortMode: "score", // score | time
+  lastQuery: "boot",
+  lastGenAt: "",
+  counters: { total: 0, flagged: 0, pinned: 0 },
+};
 
-// const LOG_LEVELS = ["INFO", "WARN", "ERROR", "DEBUG"];
-// const LOG_COLORS = {
-//   INFO: "#00ff00",
-//   WARN: "#ffaa00",
-//   ERROR: "#ff0000",
-//   DEBUG: "#00aaff",
-// };
+let cleanupKeyboard = null;
+let cleanupClick = null;
+let cleanupEvents = null;
 
-// const state = {
-//   // Log viewer
-//   logs: [],
-//   maxLogs: 50,
-//   filterLevel: "ALL", // ALL, INFO, WARN, ERROR, DEBUG
-//   searchTerm: "",
-//   autoScroll: true,
-//   selectedLogIndex: null,
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+function nowClock() {
+  const d = new Date();
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+function clamp(n, a, b) {
+  return Math.max(a, Math.min(b, n));
+}
+function escapeHtml(s) {
+  return (s || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
 
-//   // Error traces
-//   errors: [],
-//   maxErrors: 10,
-//   selectedErrorIndex: null,
+const TYPES = ["MAIL", "DOC", "FILE", "LOG", "URL"];
+const SOURCES = [
+  "vault",
+  "mailbox",
+  "cache",
+  "mirror",
+  "proxy",
+  "drop",
+  "archive",
+];
+const FLAGS = ["LEAK", "ENCRYPTED", "TOR", "C2", "KEYS", "FLAGGED"];
 
-//   // UI State
-//   activePanel: "logs", // logs, errors
-//   lastUpdate: Date.now(),
-// };
+const SEEDS = [
+  {
+    title: "Mailbox thread: press@wikileaks / mirror negotiation",
+    snippet:
+      "…requesting mirror sync windows, checksum list attached. domain: wikileaks.org …",
+    entities: {
+      domains: ["wikileaks.org"],
+      emails: ["press@wikileaks.org"],
+      ips: [],
+      hashes: [],
+      urls: [],
+    },
+    type: "MAIL",
+  },
+  {
+    title: "Vault doc: server inventory / key rotation schedule",
+    snippet:
+      "…rotation policy mentions tor bridges, onion endpoints, and fallback domains…",
+    entities: {
+      domains: ["example-mirror.net"],
+      emails: [],
+      ips: ["185.231.29.14"],
+      hashes: [],
+      urls: ["http://example-mirror.net/"],
+    },
+    type: "DOC",
+  },
+  {
+    title: "Captured page: /donate - payment processor endpoints",
+    snippet:
+      "…capture indicates third-party endpoints. cookies flagged. session jar updated…",
+    entities: {
+      domains: ["pay.example.org"],
+      emails: [],
+      ips: [],
+      hashes: [],
+      urls: ["https://pay.example.org/donate"],
+    },
+    type: "URL",
+  },
+  {
+    title: "Log extract: proxy chain / dns anomalies",
+    snippet:
+      "…NXDOMAIN spikes for subdomains, resolver fallback, suspicious TTL jitter…",
+    entities: {
+      domains: ["cdn-wl.net"],
+      emails: [],
+      ips: ["91.214.124.9"],
+      hashes: [],
+      urls: [],
+    },
+    type: "LOG",
+  },
+  {
+    title: "File: leaked_dump_index.txt",
+    snippet:
+      "…index references sha256 blocks and attachment pointers. contains signatures…",
+    entities: {
+      domains: [],
+      emails: [],
+      ips: [],
+      hashes: ["9A3F…E1B2", "C44D…9910"],
+      urls: [],
+    },
+    type: "FILE",
+  },
+];
 
-// // ============================================
-// // LOG GENERATION
-// // ============================================
+function scoreBar(score) {
+  const w = 16;
+  const filled = clamp(Math.round((score / 100) * w), 0, w);
+  const bar = "|".repeat(filled).padEnd(w, ".");
+  return bar;
+}
 
-// const LOG_MESSAGES = {
-//   INFO: [
-//     "System initialized successfully",
-//     "Connection established to remote server",
-//     "Data synchronization completed",
-//     "User authentication successful",
-//     "Cache cleared",
-//     "Configuration loaded",
-//     "Service started on port 8080",
-//     "Database connection pool ready",
-//     "Backup completed successfully",
-//     "Session restored",
-//   ],
-//   WARN: [
-//     "High memory usage detected (85%)",
-//     "Slow query detected: 2.5s",
-//     "Certificate expires in 7 days",
-//     "Deprecated API call detected",
-//     "Rate limit approaching threshold",
-//     "Disk space low (15% remaining)",
-//     "Connection timeout retry attempt 2/3",
-//     "Missing optional configuration parameter",
-//     "Legacy protocol in use",
-//     "Unverified SSL certificate",
-//   ],
-//   ERROR: [
-//     "Failed to connect to database",
-//     "Authentication failed: invalid token",
-//     "File not found: /var/log/system.log",
-//     "Permission denied: cannot write to /tmp",
-//     "Network timeout after 30s",
-//     "Invalid JSON in configuration file",
-//     "Memory allocation failed",
-//     "Segmentation fault in module core.so",
-//     "Unhandled exception in worker thread",
-//     "Critical: service crash detected",
-//   ],
-//   DEBUG: [
-//     "Entering function processRequest()",
-//     "Variable state: {active: true, count: 42}",
-//     "Query execution time: 125ms",
-//     "Cache hit for key: user:12345",
-//     "Websocket message received: 256 bytes",
-//     "Thread pool size: 16 (4 active)",
-//     "GC cycle completed: 45ms",
-//     "Request headers: [Accept, User-Agent, Cookie]",
-//     "Middleware chain: [auth, logging, cors]",
-//     "Response sent: 200 OK (1.2kb)",
-//   ],
-// };
+function makeId() {
+  return `${Date.now().toString(16)}-${Math.floor(Math.random() * 1e8).toString(16)}`;
+}
 
-// function generateRandomLog() {
-//   const level = LOG_LEVELS[Math.floor(Math.random() * LOG_LEVELS.length)];
-//   const messages = LOG_MESSAGES[level];
-//   const message = messages[Math.floor(Math.random() * messages.length)];
-//   const timestamp = new Date().toISOString();
-//   const source = ["core", "api", "db", "auth", "cache", "network"][
-//     Math.floor(Math.random() * 6)
-//   ];
+function makeResult(query = "boot") {
+  const seed = pick(SEEDS);
+  const type = seed.type || pick(TYPES);
+  const source = pick(SOURCES);
+  const t = nowClock();
 
-//   return {
-//     timestamp,
-//     level,
-//     source,
-//     message,
-//     id: Date.now() + Math.random(),
-//   };
-// }
+  let score = rand(42, 98);
+  if (/hash:|sha256|ip:|domain:/i.test(query)) score = clamp(score + 8, 0, 100);
+  if (/tor|onion|c2/i.test(query)) score = clamp(score + 12, 0, 100);
 
-// // ============================================
-// // ERROR GENERATION
-// // ============================================
+  const flags = [];
+  if (Math.random() < 0.18) flags.push("FLAGGED");
+  if (Math.random() < 0.12) flags.push("ENCRYPTED");
+  if (Math.random() < 0.1) flags.push("TOR");
+  if (Math.random() < 0.08) flags.push("C2");
+  if (Math.random() < 0.1) flags.push("LEAK");
+  if (Math.random() < 0.07) flags.push("KEYS");
 
-// const ERROR_TYPES = [
-//   "NullPointerException",
-//   "IndexOutOfBoundsException",
-//   "NetworkTimeoutException",
-//   "AuthenticationException",
-//   "DatabaseConnectionException",
-//   "FileNotFoundException",
-// ];
+  // Keep flags minimal, like a HUD
+  const finalFlags = [...new Set(flags)].slice(0, 3);
 
-// const STACK_TRACES = [
-//   [
-//     "at com.wikileaks.core.DataProcessor.process(DataProcessor.java:156)",
-//     "at com.wikileaks.api.RequestHandler.handle(RequestHandler.java:89)",
-//     "at com.wikileaks.server.Server.handleRequest(Server.java:234)",
-//     "at com.wikileaks.network.NetworkManager.dispatch(NetworkManager.java:445)",
-//   ],
-//   [
-//     "at java.util.ArrayList.get(ArrayList.java:459)",
-//     "at com.wikileaks.db.QueryExecutor.executeQuery(QueryExecutor.java:178)",
-//     "at com.wikileaks.service.DataService.fetchData(DataService.java:92)",
-//     "at com.wikileaks.api.Controller.getData(Controller.java:67)",
-//   ],
-//   [
-//     "at okhttp3.internal.connection.RealCall.execute(RealCall.java:148)",
-//     "at com.wikileaks.network.HttpClient.sendRequest(HttpClient.java:234)",
-//     "at com.wikileaks.sync.SyncManager.sync(SyncManager.java:156)",
-//     "at com.wikileaks.scheduler.JobRunner.run(JobRunner.java:89)",
-//   ],
-// ];
+  return {
+    id: makeId(),
+    time: t,
+    type,
+    source,
+    score,
+    title: seed.title,
+    snippet: seed.snippet,
+    flags: finalFlags,
+    entities: seed.entities,
+    query,
+    createdAt: Date.now(),
+  };
+}
 
-// function generateRandomError() {
-//   const type = ERROR_TYPES[Math.floor(Math.random() * ERROR_TYPES.length)];
-//   const stack = STACK_TRACES[Math.floor(Math.random() * STACK_TRACES.length)];
-//   const timestamp = new Date().toISOString();
-//   const errorMessages = [
-//     "Cannot read property 'data' of null",
-//     "Connection refused: no further information",
-//     "Index 42 is out of bounds for array length 10",
-//     "Invalid credentials provided",
-//     "File '/var/data/config.json' does not exist",
-//     "Timeout after 30000ms",
-//   ];
-//   const message =
-//     errorMessages[Math.floor(Math.random() * errorMessages.length)];
+function regenerateResults(query = state.lastQuery) {
+  state.lastQuery = query || "query";
+  state.results = [];
+  const n = rand(14, 24);
+  for (let i = 0; i < n; i++) state.results.push(makeResult(state.lastQuery));
 
-//   return {
-//     timestamp,
-//     type,
-//     message,
-//     stack,
-//     id: Date.now() + Math.random(),
-//   };
-// }
+  // Sort default
+  applySort();
 
-// // ============================================
-// // FILTERING
-// // ============================================
+  state.selected = 0;
+  state.lastGenAt = nowClock();
+  recomputeCounters();
 
-// function filterLogs() {
-//   let filtered = state.logs;
+  // Push selection to inspector
+  emitSelect();
+}
 
-//   if (state.filterLevel !== "ALL") {
-//     filtered = filtered.filter((log) => log.level === state.filterLevel);
-//   }
+function applySort() {
+  if (state.sortMode === "time") {
+    state.results.sort((a, b) => b.createdAt - a.createdAt);
+  } else {
+    state.results.sort((a, b) => b.score - a.score);
+  }
+}
 
-//   if (state.searchTerm) {
-//     const term = state.searchTerm.toLowerCase();
-//     filtered = filtered.filter(
-//       (log) =>
-//         log.message.toLowerCase().includes(term) ||
-//         log.source.toLowerCase().includes(term)
-//     );
-//   }
+function viewResults() {
+  const base = state.results;
+  if (!state.flaggedOnly) return base;
+  return base.filter(
+    (r) =>
+      r.flags.includes("FLAGGED") ||
+      r.flags.includes("LEAK") ||
+      r.flags.includes("C2"),
+  );
+}
 
-//   return filtered;
-// }
+function recomputeCounters() {
+  const total = state.results.length;
+  const flagged = state.results.filter((r) => r.flags.length > 0).length;
+  const pinned = state.pinned.size;
+  state.counters = { total, flagged, pinned };
+}
 
-// // ============================================
-// // RENDER FUNCTION
-// // ============================================
+function emitSelect() {
+  const list = viewResults();
+  if (list.length === 0) return;
+  const idx = clamp(state.selected, 0, list.length - 1);
+  state.selected = idx;
+  const item = list[idx];
+  document.dispatchEvent(new CustomEvent("search:select", { detail: item }));
+}
 
-// function render(mode) {
-//   const ts = new Date().toISOString().substring(11, 19);
-//   const filteredLogs = filterLogs();
+function emitOpen() {
+  const list = viewResults();
+  if (list.length === 0) return;
+  const item = list[clamp(state.selected, 0, list.length - 1)];
+  document.dispatchEvent(new CustomEvent("search:open", { detail: item }));
+  document.dispatchEvent(new CustomEvent("search:select", { detail: item }));
+}
 
-//   return `
-//     <div class="fui-misc-2">
-//       <!-- HEADER -->
-//       <div class="fui-header">
-//         <span class="fui-header-title">LOG MONITOR</span>
-//         <span class="fui-header-stats">
-//           LOGS: ${state.logs.length}/${state.maxLogs} |
-//           ERRORS: ${state.errors.length}/${state.maxErrors}
-//         </span>
-//         <span class="fui-header-time">${ts}</span>
-//       </div>
+function togglePin(item) {
+  if (!item) return;
+  if (state.pinned.has(item.id)) state.pinned.delete(item.id);
+  else state.pinned.add(item.id);
+  recomputeCounters();
+}
 
-//       <!-- MAIN SPLIT VIEW -->
-//       <div class="fui-misc-split">
+function renderHeader() {
+  return `
+    <div class="search2-head">
+      <div class="search2-title">RESULTS STREAM</div>
+      <div class="search2-meta">
+        <span class="k">Q</span><span class="v">${escapeHtml(state.lastQuery).slice(0, 42)}${state.lastQuery.length > 42 ? "…" : ""}</span>
+        <span class="k">GEN</span><span class="v">${state.lastGenAt || "--:--:--"}</span>
+      </div>
+    </div>
+  `;
+}
 
-//         <!-- LEFT: LOG VIEWER -->
-//         <div class="fui-log-viewer ${
-//           state.activePanel === "logs" ? "active" : ""
-//         }" data-panel="logs">
-//           <div class="fui-panel-header">
-//             <span class="fui-indicator ${
-//               state.activePanel === "logs" ? "active" : ""
-//             }">●</span>
-//             SYSTEM LOGS
-//             <span class="fui-filter-status">
-//               [${state.filterLevel}]
-//               ${state.searchTerm ? `"${state.searchTerm}"` : ""}
-//             </span>
-//           </div>
+function renderToolbar() {
+  const f = state.flaggedOnly ? "active" : "";
+  const sScore = state.sortMode === "score" ? "active" : "";
+  const sTime = state.sortMode === "time" ? "active" : "";
 
-//           <!-- Filter Bar -->
-//           <div class="fui-filter-bar">
-//             <div class="fui-filter-levels">
-//               ${["ALL", ...LOG_LEVELS]
-//                 .map(
-//                   (level) => `
-//                 <span class="fui-filter-btn ${
-//                   state.filterLevel === level ? "active" : ""
-//                 }" data-level="${level}">
-//                   ${level}
-//                 </span>
-//               `
-//                 )
-//                 .join("")}
-//             </div>
-//             <div class="fui-filter-options">
-//               <span class="fui-option ${
-//                 state.autoScroll ? "active" : ""
-//               }" data-option="autoscroll">
-//                 AUTO-SCROLL: ${state.autoScroll ? "ON" : "OFF"}
-//               </span>
-//             </div>
-//           </div>
+  return `
+    <div class="search2-toolbar">
+      <div class="search2-btn" data-action="refresh">[REFRESH]</div>
+      <div class="search2-btn ${f}" data-action="flagged">[FLAGGED]</div>
+      <div class="search2-spacer"></div>
+      <div class="search2-btn ${sScore}" data-action="sort-score">[SORT:SCORE]</div>
+      <div class="search2-btn ${sTime}" data-action="sort-time">[SORT:TIME]</div>
+      <div class="search2-counters">
+        <span class="k">TOTAL</span><span class="v">${state.counters.total}</span>
+        <span class="k">TAG</span><span class="v">${state.counters.flagged}</span>
+        <span class="k">PIN</span><span class="v">${state.counters.pinned}</span>
+      </div>
+    </div>
+  `;
+}
 
-//           <!-- Log List -->
-//           <div class="fui-log-list" id="misc-2-log-list">
-//             ${
-//               filteredLogs
-//                 .slice(-20)
-//                 .map((log, i) => {
-//                   const globalIndex = state.logs.indexOf(log);
-//                   return `
-//                 <div class="fui-log-entry ${
-//                   globalIndex === state.selectedLogIndex ? "selected" : ""
-//                 }"
-//                      data-log-index="${globalIndex}"
-//                      style="border-left-color: ${LOG_COLORS[log.level]}">
-//                   <span class="fui-log-time">${log.timestamp.substring(
-//                     11,
-//                     23
-//                   )}</span>
-//                   <span class="fui-log-level" style="color: ${
-//                     LOG_COLORS[log.level]
-//                   }">[${log.level}]</span>
-//                   <span class="fui-log-source">{${log.source}}</span>
-//                   <span class="fui-log-message">${log.message}</span>
-//                 </div>
-//               `;
-//                 })
-//                 .join("") || '<div class="fui-empty">No logs available</div>'
-//             }
-//           </div>
+function renderList() {
+  const list = viewResults();
+  if (list.length === 0) {
+    return `<div class="search2-empty">No results</div>`;
+  }
 
-//           <!-- Actions -->
-//           <div class="fui-log-actions">
-//             <span class="fui-action-hint">[TAB] Switch  [1-5] Filter  [A] Toggle Auto-scroll  [C] Clear</span>
-//           </div>
-//         </div>
+  return `
+    <div class="search2-list" tabindex="0">
+      ${list
+        .map((r, i) => {
+          const sel = i === state.selected ? "selected" : "";
+          const pin = state.pinned.has(r.id) ? "pin" : "";
+          const fl = r.flags && r.flags.length ? "flag" : "";
+          const tag = (r.flags || []).join(" ");
+          const bar = scoreBar(r.score);
+          return `
+            <div class="search2-row ${sel} ${pin} ${fl}" data-rid="${r.id}">
+              <span class="sc">${String(r.score).padStart(3, " ")}%</span>
+              <span class="bar">${bar}</span>
+              <span class="tp">[${r.type}]</span>
+              <span class="src">${r.source}</span>
+              <span class="tm">${r.time}</span>
+              <span class="ttl">${escapeHtml(r.title)}</span>
+              <span class="tg">${escapeHtml(tag || ".")}</span>
+              <span class="sn">${escapeHtml(r.snippet)}</span>
+            </div>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
 
-//         <!-- RIGHT: ERROR TRACES -->
-//         <div class="fui-error-viewer ${
-//           state.activePanel === "errors" ? "active" : ""
-//         }" data-panel="errors">
-//           <div class="fui-panel-header">
-//             <span class="fui-indicator ${
-//               state.activePanel === "errors" ? "active" : ""
-//             }">●</span>
-//             ERROR TRACES
-//           </div>
+function renderFooter() {
+  return `
+    <div class="search2-foot">
+      <span>[↑/↓] select</span>
+      <span>[ENTER] open</span>
+      <span>[SPACE] pin</span>
+      <span>[F] flagged</span>
+      <span>[R] re-rank</span>
+      <span>[CLICK] select</span>
+    </div>
+  `;
+}
 
-//           <!-- Error List -->
-//           <div class="fui-error-list">
-//             ${
-//               state.errors
-//                 .slice(-10)
-//                 .reverse()
-//                 .map((error, i) => {
-//                   const globalIndex = state.errors.length - 1 - i;
-//                   const isExpanded = globalIndex === state.selectedErrorIndex;
+function render() {
+  return `
+    <div class="fui-search-2">
+      ${renderHeader()}
+      ${renderToolbar()}
+      <div class="search2-body">
+        ${renderList()}
+      </div>
+      ${renderFooter()}
+    </div>
+  `;
+}
 
-//                   return `
-//                 <div class="fui-error-entry ${
-//                   isExpanded ? "expanded" : ""
-//                 }" data-error-index="${globalIndex}">
-//                   <div class="fui-error-header">
-//                     <span class="fui-error-time">${error.timestamp.substring(
-//                       11,
-//                       23
-//                     )}</span>
-//                     <span class="fui-error-type">${error.type}</span>
-//                     <span class="fui-error-expand">${
-//                       isExpanded ? "[-]" : "[+]"
-//                     }</span>
-//                   </div>
-//                   <div class="fui-error-message">${error.message}</div>
-//                   ${
-//                     isExpanded
-//                       ? `
-//                     <div class="fui-error-stack">
-//                       <div class="fui-stack-label">STACK TRACE:</div>
-//                       ${error.stack
-//                         .map(
-//                           (line) => `
-//                         <div class="fui-stack-line">${line}</div>
-//                       `
-//                         )
-//                         .join("")}
-//                     </div>
-//                   `
-//                       : ""
-//                   }
-//                 </div>
-//               `;
-//                 })
-//                 .join("") || '<div class="fui-empty">No errors recorded</div>'
-//             }
-//           </div>
+function update() {
+  // small background drift: occasionally insert a new item to feel alive
+  if (state.results.length === 0) return;
 
-//           <!-- Actions -->
-//           <div class="fui-error-actions">
-//             <span class="fui-action-hint">[TAB] Switch  [CLICK] Expand/Collapse  [C] Clear Errors</span>
-//           </div>
-//         </div>
+  if (Math.random() < 0.22) {
+    state.results.unshift(makeResult(state.lastQuery));
+    if (state.results.length > 42) state.results.pop();
+    applySort();
+    recomputeCounters();
+  } else {
+    // score jitter
+    const r = pick(state.results);
+    if (r) r.score = clamp(r.score + rand(-2, 2), 0, 100);
+    applySort();
+  }
+}
 
-//       </div>
-//     </div>
-//   `;
-// }
+function findById(rid) {
+  return state.results.find((r) => r.id === rid) || null;
+}
 
-// // ============================================
-// // UPDATE FUNCTION
-// // ============================================
+function setupInteractions() {
+  if (cleanupKeyboard) cleanupKeyboard();
+  if (cleanupClick) cleanupClick();
+  if (cleanupEvents) cleanupEvents();
 
-// function update() {
-//   // Generate new log every update
-//   if (Math.random() > 0.3) {
-//     const log = generateRandomLog();
-//     state.logs.push(log);
+  // Keyboard (gated)
+  cleanupKeyboard = setupKeyboardHandler("search-2", {
+    ArrowUp: () => {
+      if (!isWindowActive("search-2")) return;
+      const list = viewResults();
+      if (list.length === 0) return;
+      state.selected = clamp(state.selected - 1, 0, list.length - 1);
+      emitSelect();
+      search2Window.forceRender();
+    },
+    ArrowDown: () => {
+      if (!isWindowActive("search-2")) return;
+      const list = viewResults();
+      if (list.length === 0) return;
+      state.selected = clamp(state.selected + 1, 0, list.length - 1);
+      emitSelect();
+      search2Window.forceRender();
+    },
+    Enter: () => {
+      if (!isWindowActive("search-2")) return;
+      emitOpen();
+      search2Window.forceRender();
+    },
+    Space: () => {
+      if (!isWindowActive("search-2")) return;
+      const list = viewResults();
+      if (list.length === 0) return;
+      const item = list[clamp(state.selected, 0, list.length - 1)];
+      togglePin(item);
+      search2Window.forceRender();
+    },
+    KeyF: () => {
+      if (!isWindowActive("search-2")) return;
+      state.flaggedOnly = !state.flaggedOnly;
+      state.selected = 0;
+      emitSelect();
+      search2Window.forceRender();
+    },
+    KeyR: () => {
+      if (!isWindowActive("search-2")) return;
+      state.sortMode = state.sortMode === "score" ? "time" : "score";
+      applySort();
+      state.selected = 0;
+      emitSelect();
+      search2Window.forceRender();
+    },
+    Escape: () => {
+      if (!isWindowActive("search-2")) return;
+      state.selected = 0;
+      emitSelect();
+      search2Window.forceRender();
+    },
+  });
 
-//     if (state.logs.length > state.maxLogs) {
-//       state.logs.shift();
-//     }
+  // Clicks (always allowed)
+  cleanupClick = setupClickHandler("search-2", "*", (e, target) => {
+    const btn = target.closest("[data-action]");
+    if (btn) {
+      const a = btn.dataset.action;
+      if (a === "refresh") {
+        regenerateResults(state.lastQuery);
+        search2Window.forceRender();
+        return;
+      }
+      if (a === "flagged") {
+        state.flaggedOnly = !state.flaggedOnly;
+        state.selected = 0;
+        emitSelect();
+        search2Window.forceRender();
+        return;
+      }
+      if (a === "sort-score") {
+        state.sortMode = "score";
+        applySort();
+        state.selected = 0;
+        emitSelect();
+        search2Window.forceRender();
+        return;
+      }
+      if (a === "sort-time") {
+        state.sortMode = "time";
+        applySort();
+        state.selected = 0;
+        emitSelect();
+        search2Window.forceRender();
+        return;
+      }
+    }
 
-//     // Generate error occasionally
-//     if (log.level === "ERROR" && Math.random() > 0.5) {
-//       const error = generateRandomError();
-//       state.errors.push(error);
+    const row = target.closest(".search2-row");
+    if (row) {
+      const rid = row.dataset.rid;
+      const list = viewResults();
+      const idx = list.findIndex((x) => x.id === rid);
+      if (idx >= 0) {
+        state.selected = idx;
+        emitSelect();
+        search2Window.forceRender();
 
-//       if (state.errors.length > state.maxErrors) {
-//         state.errors.shift();
-//       }
-//     }
-//   }
+        // double click -> open
+        if (e.detail === 2) {
+          emitOpen();
+        }
+      }
+      return;
+    }
+  });
 
-//   state.lastUpdate = Date.now();
+  // Events from other windows (optional)
+  const onRun = (ev) => {
+    const q = ev && ev.detail && ev.detail.query ? ev.detail.query : "run";
+    regenerateResults(q);
+    search2Window.forceRender();
+  };
 
-//   // Auto-scroll if enabled
-//   if (state.autoScroll && state.activePanel === "logs") {
-//     setTimeout(() => {
-//       const logList = document.getElementById("misc-2-log-list");
-//       if (logList) {
-//         logList.scrollTop = logList.scrollHeight;
-//       }
-//     }, 50);
-//   }
-// }
+  const onPivot = (ev) => {
+    const q = ev && ev.detail && ev.detail.query ? ev.detail.query : "pivot";
+    regenerateResults(q);
+    search2Window.forceRender();
+  };
 
-// // ============================================
-// // INTERACTIONS
-// // ============================================
+  document.addEventListener("search:run", onRun);
+  document.addEventListener("search:pivot", onPivot);
 
-// import { setupKeyboardHandler, setupClickHandler } from "../core/utils.js";
+  cleanupEvents = () => {
+    document.removeEventListener("search:run", onRun);
+    document.removeEventListener("search:pivot", onPivot);
+  };
+}
 
-// let cleanupKeyboard = null;
-// let cleanupClick = null;
+// Window instance
+const search2Window = createFUIWindow({
+  id: "search-2",
+  render,
+  update,
+  interval: { min: 850, max: 1500 },
+  defaultMode: "default",
+  scrollConfig: { containerSelector: ".search2-list" },
+});
 
-// function setupInteractions() {
-//   if (cleanupKeyboard) cleanupKeyboard();
-//   if (cleanupClick) cleanupClick();
+export function startSearch2() {
+  if (state.results.length === 0) regenerateResults("boot");
+  search2Window.start();
+  setTimeout(setupInteractions, 60);
+}
 
-//   cleanupKeyboard = setupKeyboardHandler("search-2", {
-//     Tab: () => {
-//       state.activePanel = state.activePanel === "logs" ? "errors" : "logs";
-//       miscWindow.forceRender();
-//     },
-//     Digit1: () => {
-//       if (state.activePanel === "logs") {
-//         state.filterLevel = "ALL";
-//         miscWindow.forceRender();
-//       }
-//     },
-//     Digit2: () => {
-//       if (state.activePanel === "logs") {
-//         state.filterLevel = "INFO";
-//         miscWindow.forceRender();
-//       }
-//     },
-//     Digit3: () => {
-//       if (state.activePanel === "logs") {
-//         state.filterLevel = "WARN";
-//         miscWindow.forceRender();
-//       }
-//     },
-//     Digit4: () => {
-//       if (state.activePanel === "logs") {
-//         state.filterLevel = "ERROR";
-//         miscWindow.forceRender();
-//       }
-//     },
-//     Digit5: () => {
-//       if (state.activePanel === "logs") {
-//         state.filterLevel = "DEBUG";
-//         miscWindow.forceRender();
-//       }
-//     },
-//     KeyA: () => {
-//       if (state.activePanel === "logs") {
-//         state.autoScroll = !state.autoScroll;
-//         miscWindow.forceRender();
-//       }
-//     },
-//     KeyC: () => {
-//       if (state.activePanel === "logs") {
-//         state.logs = [];
-//         state.selectedLogIndex = null;
-//         miscWindow.forceRender();
-//       } else if (state.activePanel === "errors") {
-//         state.errors = [];
-//         state.selectedErrorIndex = null;
-//         miscWindow.forceRender();
-//       }
-//     },
-//   });
-
-//   cleanupClick = setupClickHandler("search-2", "*", (e, target) => {
-//     const panel = target.closest(".fui-log-viewer, .fui-error-viewer");
-//     if (panel) {
-//       state.activePanel = panel.dataset.panel;
-//       miscWindow.forceRender();
-//       return;
-//     }
-
-//     const filterBtn = target.closest(".fui-filter-btn");
-//     if (filterBtn) {
-//       state.filterLevel = filterBtn.dataset.level;
-//       miscWindow.forceRender();
-//       return;
-//     }
-
-//     const option = target.closest(".fui-option");
-//     if (option && option.dataset.option === "autoscroll") {
-//       state.autoScroll = !state.autoScroll;
-//       miscWindow.forceRender();
-//       return;
-//     }
-
-//     const logEntry = target.closest(".fui-log-entry");
-//     if (logEntry) {
-//       const index = parseInt(logEntry.dataset.logIndex);
-//       state.selectedLogIndex = state.selectedLogIndex === index ? null : index;
-//       miscWindow.forceRender();
-//       return;
-//     }
-
-//     const errorEntry = target.closest(".fui-error-entry");
-//     if (errorEntry) {
-//       const index = parseInt(errorEntry.dataset.errorIndex);
-//       state.selectedErrorIndex = state.selectedErrorIndex === index ? null : index;
-//       miscWindow.forceRender();
-//       return;
-//     }
-//   });
-// }
-//     const errorEntry = e.target.closest(".fui-error-entry");
-//     if (errorEntry) {
-//       const index = parseInt(errorEntry.dataset.errorIndex);
-//       state.selectedErrorIndex =
-//         state.selectedErrorIndex === index ? null : index;
-//       misc2Window.forceRender();
-//       return;
-//     }
-//   });
-// }
-
-// // ============================================
-// // INITIALIZATION
-// // ============================================
-
-// // Generate initial logs
-// for (let i = 0; i < 15; i++) {
-//   state.logs.push(generateRandomLog());
-// }
-
-// // Generate initial errors
-// for (let i = 0; i < 3; i++) {
-//   state.errors.push(generateRandomError());
-// }
-
-// const misc2Window = createFUIWindow({
-//   id: "misc-2",
-//   render,
-//   update,
-//   interval: { min: 1500, max: 3500 },
-//   defaultMode: "large",
-//   autoRender: true,
-// });
-
-// const miscWindow = createFUIWindow({
-//   id: "search-2",
-//   render,
-//   update,
-//   interval: null,
-//   defaultMode: "large",
-//   autoRender: true,
-// });
-
-// export function startSearch2() {
-//   miscWindow.start();
-//   setTimeout(setupInteractions, 100);
-// }
-
-// export function stopSearch2() {
-//   miscWindow.stop();
-//   if (cleanupKeyboard) cleanupKeyboard();
-//   if (cleanupClick) cleanupClick();
-// }
+export function stopSearch2() {
+  search2Window.stop();
+  if (cleanupKeyboard) cleanupKeyboard();
+  if (cleanupClick) cleanupClick();
+  if (cleanupEvents) cleanupEvents();
+  cleanupKeyboard = null;
+  cleanupClick = null;
+  cleanupEvents = null;
+}
