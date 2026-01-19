@@ -29,7 +29,7 @@ const NETWORK_NAMES = [
 
 const INTERFACE_STATES = ["ACTIVE", "IDLE", "UP", "DOWN", "SECURE"];
 
-const MAX_INTERFACE_LINES = 35;
+const MAX_INTERFACE_LINES = 40;
 
 let interfaceData = [];
 let isInitialized = false;

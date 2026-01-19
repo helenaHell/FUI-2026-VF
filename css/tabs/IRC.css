@@ -237,7 +237,7 @@
   padding: 4px 0px 4px 0px;
   color: var(--text-glow2);
   position: absolute;
-  margin: none;
+  margin: 0px;
   bottom: 0;
   left: 0;
 }
